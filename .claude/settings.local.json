@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Skill(job-application-assistant)",
+      "Skill(job-scraper)",
       "Bash(python3:*)",
       "Bash(python:*)",
       "Bash(curl:*)",

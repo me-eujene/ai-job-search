@@ -149,8 +149,8 @@ Add role-specific profile statement templates based on their background.
 ### 6. Update `07-interview-prep.md`
 Create STAR examples from their actual experience (at least 3-4 examples).
 
-### 7. Update `cv/main_example.tex`
-Replace placeholder personal data with their actual name, contact info, and add their education and most recent experience entries.
+### 7. Create `cv/main_<lastname>.tex`
+Copy `cv/main_example.tex` and replace placeholder personal data with their actual name, contact info, and add their education and most recent experience entries. Do not modify `cv/main_example.tex` — it is the reusable template seed.
 
 ### 8. Update `.claude/skills/job-scraper/search-queries.md`
 Replace all placeholder tokens with the user's actual information from Section 9:
@@ -179,7 +179,7 @@ Present a summary:
 > - `.claude/skills/job-application-assistant/04-job-evaluation.md` - Personalized evaluation framework
 > - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
 > - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience
-> - `cv/main_example.tex` - Your LaTeX CV template
+> - `cv/main_<lastname>.tex` - Your LaTeX CV base (copied from `main_example.tex`)
 > - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/scrape`
 >
 > **Try it out:**
