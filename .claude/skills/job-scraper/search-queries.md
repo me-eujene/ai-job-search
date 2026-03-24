@@ -1,76 +1,94 @@
-# Search Queries for Job Scraper
+# Job Scraper Configuration
 
-<!-- SETUP: Customize these queries based on your skills, target roles, and location -->
+<!-- SETUP: Populated by /setup -- section search -->
+<!-- Describes the .env variables that control the Python scraper in job_scraper/ -->
 
-## Search Sites
+## How the scraper is configured
 
-Primary (Danish job market):
-- **jobindex.dk** - largest Danish job board
-- **linkedin.com/jobs** - LinkedIn job listings (filter: Denmark / your city)
-- **karriere.dk** - IDA's job board (engineering/science roles)
-- **jobfinder.dk** - another major Danish job board
-- **akademikernes.dk** - academic union job board
+The Python scraper in `job_scraper/` reads its search parameters from `job_scraper/.env`.
+This file documents the current configuration for reference. Edit `.env` directly to change search behaviour.
 
-Secondary (company career pages via Google):
-- Direct Google searches with `site:` filters for known target companies
+---
 
-## Query Categories
+## Active configuration
 
-Queries are grouped by priority. Each query should be combined with your location terms (e.g. "Copenhagen", "Sjælland", "Hovedstaden") where the site supports it.
+### Sources
 
-### Priority 1: [YOUR_PRIMARY_ROLE_TYPE]
+| Source | Status | Auth |
+|--------|--------|------|
+| NVB (Nationale Vacaturebank) | Enabled | None |
+| Indeed NL | Enabled — requires `RAPIDAPI_KEY` | RapidAPI key |
+| LinkedIn NL | Enabled — requires `RAPIDAPI_KEY` | RapidAPI key |
 
-These match your strongest and most desired career direction.
+---
 
-```
-site:jobindex.dk "[YOUR_PRIMARY_JOB_TITLE]" [YOUR_CITY]
-site:jobindex.dk "[YOUR_KEY_SKILL]" [YOUR_CITY]
-site:linkedin.com/jobs "[YOUR_PRIMARY_JOB_TITLE]" [YOUR_COUNTRY]
-```
-
-### Priority 2: [YOUR_DOMAIN_EXPERTISE]
-
-These match your domain expertise.
+### NVB settings
 
 ```
-site:jobindex.dk [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] OR [YOUR_REGION]
-site:jobindex.dk [YOUR_DOMAIN_KEYWORD_2] [YOUR_COUNTRY]
-site:linkedin.com/jobs [YOUR_DOMAIN_KEYWORD_1] [YOUR_CITY] [YOUR_COUNTRY]
+NVB_DCO_TITLE=[YOUR_PRIMARY_ROLE_TYPE]
+NVB_CITY=[YOUR_CITY]
+NVB_DISTANCE_KM=40
 ```
 
-### Priority 3: [YOUR_ADJACENT_ROLE_TYPE]
+`NVB_DCO_TITLE` uses NVB's own job taxonomy (`dcoTitle` filter). Examples:
+- `Productmanager` — covers Product Manager, Senior PM, Product Owner, Product Lead
+- `Data Scientist`
+- `Software Engineer`
+- `Business Analyst`
 
-Adjacent roles you could pivot into.
+To find valid taxonomy titles, search NVB and observe the `dcoTitle` value in the URL or network requests.
+
+---
+
+### Indeed NL / LinkedIn NL queries
 
 ```
-site:jobindex.dk "[YOUR_ADJACENT_TITLE_1]" [YOUR_KEY_SKILL] [YOUR_CITY]
-site:jobindex.dk "[YOUR_ADJACENT_TITLE_2]" [YOUR_KEY_SKILL] [YOUR_CITY]
+SEARCH_QUERIES=[YOUR_PRIMARY_JOB_TITLE],[YOUR_SECONDARY_JOB_TITLE]
 ```
 
-### Priority 4: Broader Technical / Consulting
+Comma-separated search terms sent to both Indeed NL and LinkedIn NL. These are full-text searches, so broader terms (e.g. `product manager`) work better than narrow ones.
 
-Wider net for general technical roles.
+---
+
+### Title relevance filter (all sources)
 
 ```
-site:jobindex.dk [YOUR_KEY_SKILL] developer [YOUR_CITY]
-site:linkedin.com/jobs "[YOUR_KEY_SKILL] developer" [YOUR_CITY]
-site:jobindex.dk "technical consultant" [YOUR_DOMAIN] [YOUR_CITY]
+TITLE_KEYWORDS=[YOUR_PRIMARY_JOB_TITLE],[YOUR_SECONDARY_JOB_TITLE],[YOUR_KEY_SKILL]
 ```
 
-## Location Filter
+Client-side filter applied after fetching. A job is kept only if its title contains at least one of these phrases. This is the safety net for API noise — especially NVB, which can return off-topic results even with `dcoTitle`. Use lowercase, comma-separated phrases.
 
-When evaluating results, verify the job location is within reasonable commute distance from your home. Define acceptable areas:
-- [YOUR_CITY] and surrounding areas
-- [ACCEPTABLE_AREA_1]
-- [ACCEPTABLE_AREA_2]
-- [BORDERLINE_AREA] (borderline - ~X min by transit)
-- [TOO_FAR_AREA] (too far)
+---
 
-## Date Filter
+### Location scope
 
-Only include jobs posted within the last 14 days, or with an application deadline that has not yet passed. If a posting date cannot be determined, include it but flag as "date unknown".
+Target city and commute radius for NVB (NVB resolves coordinates automatically):
 
-## Adapting Queries
+```
+NVB_CITY=[YOUR_CITY]
+NVB_DISTANCE_KM=[YOUR_RADIUS_KM]
+```
 
-If the user specifies a focus area, select queries from the matching category and also generate 2-3 custom queries for that focus. For example:
-- "/scrape [focus_area]" -> relevant category queries + custom focus-specific queries
+For Indeed/LinkedIn, embed the city in `SEARCH_QUERIES` if needed (e.g. `product manager amsterdam`), since city-level filtering via API params is unreliable for NL.
+
+Acceptable commute areas (for Claude to use when assessing fit):
+- Ideal: [YOUR_CITY] and direct surroundings
+- Acceptable: [ACCEPTABLE_AREA_1]
+- Borderline: [BORDERLINE_AREA] (~X min by transit)
+- Too far: [TOO_FAR_AREA]
+
+---
+
+## Updating this configuration
+
+Re-run setup to reconfigure search without touching your profile:
+
+```
+/setup --section search
+```
+
+Or edit `job_scraper/.env` directly and restart the server:
+
+```bash
+cd job_scraper && python -m ui.server
+```

@@ -104,7 +104,7 @@ Cover letters use a custom LaTeX document class (`cover.cls`) with Lato/Raleway 
 ### Non-English Cover Letters
 - Same template structure, just write content in the posting's language
 - Adjust date format to local convention
-- Adjust closing to local convention (e.g. "Med venlig hilsen," for Danish)
+- Adjust closing to local convention (e.g. "Met vriendelijke groet," for Dutch)
 
 ## Checklist Before Finalizing
 - [ ] No em-dashes (use commas or periods instead)

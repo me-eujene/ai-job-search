@@ -5,7 +5,13 @@
       "Bash(python3:*)",
       "Bash(python:*)",
       "Bash(curl:*)",
-      "Bash(bun:*)"
+      "Bash(uvicorn:*)",
+      "Bash(pip install:*)",
+      "Bash(pkill -f uvicorn)",
+      "Bash(tasklist /fi 'IMAGENAME eq python.exe')",
+      "Bash(netstat -ano)",
+      "Bash(tasklist)",
+      "Skill(commit-commands:commit)"
     ]
   }
 }

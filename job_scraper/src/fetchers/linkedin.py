@@ -129,11 +129,13 @@ async def _search(
     )
     resp.raise_for_status()
     data = resp.json()
-    return (
-        data.get("jobs")
-        or data.get("data")
-        or []
-    )
+
+    # Documented schema: { "jobs": [...] }
+    for key in ("jobs", "data"):
+        if key in data:
+            return data[key]
+    logger.warning("LinkedIn: unexpected response shape — top-level keys: %s", list(data.keys()))
+    return []
 
 
 def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
@@ -165,12 +167,7 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
         dt2 = parse_iso(date_raw)
         date_posted = iso_date(dt2) if dt2 else ""
 
-    apply_url = (
-        raw.get("detailsPageUrl")
-        or raw.get("applyUrl")
-        or raw.get("url")
-        or ""
-    )
+    apply_url = raw.get("detailsPageUrl") or raw.get("url") or ""
 
     description = raw.get("description") or raw.get("snippet") or None
 

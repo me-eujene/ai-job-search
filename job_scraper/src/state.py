@@ -72,27 +72,21 @@ def init_db() -> None:
             con.execute("ALTER TABLE seen_jobs ADD COLUMN fetched_at TEXT")
 
 
-def is_seen(canonical_key: str) -> bool:
-    with _conn() as con:
-        row = con.execute(
-            "SELECT 1 FROM seen_jobs WHERE canonical_key = ?", (canonical_key,)
-        ).fetchone()
-        return row is not None
-
-
-def mark_seen(canonical_key: str, title: str, company: str,
-              location: str, source: str, apply_url: str,
-              date_posted: str, description: Optional[str] = None,
-              fetched_at: Optional[str] = None) -> None:
+def mark_seen_if_new(canonical_key: str, title: str, company: str,
+                     location: str, source: str, apply_url: str,
+                     date_posted: str, description: Optional[str] = None,
+                     fetched_at: Optional[str] = None) -> bool:
+    """Insert the job atomically. Returns True if inserted (new), False if already seen."""
     now = datetime.now(timezone.utc).isoformat()
     with _conn() as con:
-        con.execute("""
+        cur = con.execute("""
             INSERT OR IGNORE INTO seen_jobs
               (canonical_key, title, company, location, source, apply_url,
                date_posted, first_seen, description, fetched_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (canonical_key, title, company, location, source,
               apply_url, date_posted, now, description, fetched_at))
+        return cur.rowcount > 0
 
 
 def start_run(run_id: str, started_at: str) -> None:

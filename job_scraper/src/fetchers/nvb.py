@@ -15,6 +15,7 @@ KEY FINDINGS (2026-03-23):
   - A small number of false positives (dcoTitle mapping noise) remain — removed by the
     client-side title keyword filter.
 """
+import json as _json
 import logging
 import os
 from typing import Optional
@@ -207,7 +208,9 @@ async def _search_page(
     url = f"{BASE_URL}{SEARCH_PATH}?{qs}&filters={filters_enc}"
     resp = await client.get(url)
     resp.raise_for_status()
-    return resp.json()
+    # Force UTF-8: httpx/chardet can misdetect cp1251 from Cyrillic-heavy
+    # description text, garbling € and – characters.
+    return _json.loads(resp.content.decode("utf-8"))
 
 
 def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:

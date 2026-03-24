@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Job Application Assistant for [YOUR_NAME]
 
 <!-- SETUP: This file is populated by running /setup -->
@@ -80,7 +84,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 - `cv/` - LaTeX CV variants (moderncv template, banking style)
 - `cover_letters/` - LaTeX cover letters (custom cover.cls template)
 - `.claude/skills/` - AI skill definitions for the application workflow
-- `.agents/skills/` - Job search CLI tools
+- `job_scraper/` - Python job scraper for the Dutch market (Indeed NL, LinkedIn NL, NVB)
 
 ## Workflow for New Job Applications
 1. User provides a job posting (URL or text)
@@ -118,3 +122,62 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 - [ ] Agentic coding / AI tooling references mention **Claude Code** by name
 - [ ] Cover letter is addressed to the correct person (or "Dear Hiring Manager" if unknown)
 - [ ] Cover letter fits approximately one page
+
+## Commands
+
+### Compile documents
+```bash
+# CV (moderncv/banking style) — pdflatex
+cd cv && pdflatex main_<company>.tex && cd ..
+
+# Cover letter (custom cover.cls with Lato/Raleway fonts) — xelatex required
+cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
+```
+
+### Job scraper (NL Python pipeline)
+```bash
+# Install dependencies (first time)
+pip install -r job_scraper/requirements.txt
+
+# Start the scraper server
+cd job_scraper && python -m ui.server
+
+# Trigger a run manually
+curl -s -X POST http://localhost:8000/api/run/now
+
+# Query new jobs (last 14 days)
+curl -s "http://localhost:8000/api/jobs?since=$(date -d '14 days ago' +%Y-%m-%d)"
+
+# Check status / errors
+curl -s http://localhost:8000/api/status
+curl -s http://localhost:8000/api/errors
+```
+
+
+## Architecture
+
+### Two-tier tool system
+The repo has two distinct layers of AI tooling that work differently:
+
+- **`.claude/skills/`** — Claude Code skills (Markdown). These are loaded by the `Skill` tool and give Claude instructions. They are not executed; they shape Claude's behavior. The `job-application-assistant` skill (7 reference files) and `job-scraper` skill live here.
+- **`job_scraper/`** — Python service with a REST API. Claude triggers it via `curl` and queries results via `/api/jobs`. Uses FastAPI + APScheduler; state in SQLite (`state.db`).
+
+### Drafter-reviewer pattern (`/apply`)
+The `/apply` command (`.claude/commands/apply.md`) orchestrates a two-agent loop:
+1. **Drafter** (main Claude session): evaluates fit → drafts CV + cover letter as LaTeX files
+2. **Reviewer** (spawned `Agent`): researches the company via WebSearch/WebFetch, reads all reference files, critiques the drafts
+3. **Drafter** revises both files in-place based on the reviewer's structured feedback
+
+This pattern separates research/critique from authoring to reduce confirmation bias.
+
+### Profile data flow
+`/setup` populates data into multiple files simultaneously. All of these must stay in sync:
+- `CLAUDE.md` (this file) — always loaded, candidate profile + workflow rules
+- `.claude/skills/job-application-assistant/01-candidate-profile.md` — detailed structured profile read by both drafter and reviewer
+- `.claude/skills/job-scraper/search-queries.md` — search queries used by `/scrape`
+
+The `cv/main_example.tex` file is the **LaTeX template seed**; `/apply` copies and tailors it into `cv/main_<company>.tex`.
+
+### Application state
+- `job_scraper/state.db` — SQLite deduplication store for the Python scraper
+- `job_search_tracker.csv` — application tracking spreadsheet (also used for deduplication)

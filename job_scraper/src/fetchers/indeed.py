@@ -129,13 +129,12 @@ async def _search(
     resp.raise_for_status()
     data = resp.json()
 
-    # Response schema: { "data": [...], "meta": { "totalResults": N } }
-    # or flat { "jobs": [...] } depending on API version
-    return (
-        data.get("data")
-        or data.get("jobs")
-        or []
-    )
+    # Documented schema: { "data": [...], "meta": { "totalResults": N } }
+    for key in ("data", "jobs"):
+        if key in data:
+            return data[key]
+    logger.warning("Indeed: unexpected response shape — top-level keys: %s", list(data.keys()))
+    return []
 
 
 def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
@@ -169,13 +168,7 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
     dt = parse_iso(date_raw)
     date_posted = iso_date(dt) if dt else ""
 
-    # Apply URL
-    apply_url = (
-        raw.get("detailsPageUrl")
-        or raw.get("applyUrl")
-        or raw.get("url")
-        or ""
-    )
+    apply_url = raw.get("detailsPageUrl") or raw.get("url") or ""
 
     description = raw.get("description") or raw.get("snippet") or None
 

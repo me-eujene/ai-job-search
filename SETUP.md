@@ -14,20 +14,12 @@ npm install -g @anthropic-ai/claude-code
 
 You'll need an Anthropic API key or a Claude Pro/Team subscription. See the [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code) for details.
 
-### Python
+### Python 3.10+
 
-Python 3.10+ is required for the salary lookup tool. Check with:
+Required for the job scraper. Check with:
 
 ```bash
 python --version
-```
-
-### Bun (for job search tools)
-
-The Danish job portal CLIs are written in TypeScript and run with Bun:
-
-```bash
-curl -fsSL https://bun.sh/install | bash
 ```
 
 ### LaTeX (for compiling CVs and cover letters)
@@ -43,21 +35,32 @@ The CV compiles with `pdflatex`. The cover letter compiles with `xelatex` (for c
 ## 2. Fork and clone
 
 ```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
+gh repo fork <your-fork> --clone
 cd ai-job-search
 ```
 
-Or manually: fork on GitHub, then clone your fork.
-
-## 3. Install job search CLI dependencies
+## 3. Install scraper dependencies
 
 ```bash
-for tool in jobbank-search jobdanmark-search jobindex-search jobnet-search; do
-  cd .agents/skills/$tool/cli && bun install && cd ../../../..
-done
+pip install -r job_scraper/requirements.txt
 ```
 
-## 4. Run the setup interview
+## 4. Configure the scraper
+
+```bash
+cp job_scraper/.env.example job_scraper/.env
+```
+
+Open `job_scraper/.env` and fill in:
+
+- **`RAPIDAPI_KEY`** — required for Indeed NL and LinkedIn NL. Get a free key at [rapidapi.com](https://rapidapi.com/letscrape-6bRBa3QguO5/api/jobs-api14) (200 requests/month free tier).
+- **`SEARCH_QUERIES`** — comma-separated job titles to search (e.g. `product manager,product owner`).
+- **`NVB_DCO_TITLE`** — NVB taxonomy title matching your role (default: `Productmanager`).
+- **`NVB_CITY`** / **`NVB_DISTANCE_KM`** — your target city and commute radius.
+
+NVB (Nationale Vacaturebank) requires no API key.
+
+## 5. Run the setup interview
 
 Start Claude Code in the repository:
 
@@ -86,14 +89,14 @@ Both paths produce the same result: fully populated profile files.
 | `01-candidate-profile.md` | Structured education, experience, skills |
 | `02-behavioral-profile.md` | Behavioral assessment |
 | `04-job-evaluation.md` | Personalized skill match areas and career goals |
-| `05-cv-templates.md` | Profile statement templates for your background |
+| `05-cv-templates.md` | CV templates with your profile statements |
 | `07-interview-prep.md` | STAR examples from your experience |
-| `cv/main_example.tex` | Your LaTeX CV with actual details |
-| `search-queries.md` | Job search queries for `/scrape` |
+| `cv/main_example.tex` | Your LaTeX CV template |
+| `search-queries.md` | Job search queries for `/scrape` fallback |
 
 ### Re-running setup
 
-You can update specific sections later:
+Update specific sections later without re-doing the full profile:
 
 ```
 /setup --section skills
@@ -101,27 +104,22 @@ You can update specific sections later:
 /setup --section search
 ```
 
-The `--section search` option is especially useful as your priorities evolve. It re-runs the search configuration interview and suggests role types you may not have considered based on your full profile.
-
-## 5. Optional: Set up salary benchmarking
-
-If you have salary data (from a union, salary survey, Glassdoor, or personal research):
-
-1. **Option A:** Create `salary_data.json` manually in the repo root (see `tools/README_SALARY_TOOL.md` for the format)
-2. **Option B:** Convert from Excel:
-   ```bash
-   pip install openpyxl
-   python tools/convert_salary_excel.py path/to/salary-data.xlsx --source "My Salary Data 2025"
-   ```
-
-This creates `salary_data.json` which the `/apply` workflow uses for salary benchmarking. If you skip this step, salary lookup is simply omitted.
+The `--section search` option is especially useful as your priorities evolve.
 
 ## 6. Test the workflow
 
-Find a job posting you're interested in, then:
+### Search for jobs
 
 ```
-/apply https://jobindex.dk/job/1234567
+/scrape
+```
+
+Claude starts the job scraper server, triggers a run, and presents matches. Typical first run takes 30–60 seconds.
+
+### Apply to a job
+
+```
+/apply https://www.linkedin.com/jobs/view/123456789
 ```
 
 Or paste the job description directly:
@@ -142,25 +140,27 @@ Claude will:
 After `/apply` creates the LaTeX files:
 
 ```bash
-# Compile CV
+# Compile CV (pdflatex)
 cd cv && pdflatex main_<company>.tex && cd ..
 
-# Compile cover letter
+# Compile cover letter (xelatex — required for custom fonts)
 cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 ```
 
 ## Troubleshooting
 
-### "salary_data.json not found"
-This is expected if you haven't set up salary benchmarking. The `/apply` workflow skips this step automatically.
+### Scraper not returning results
 
-### Job search CLI tools not working
-Make sure Bun is installed and you ran `bun install` in each CLI directory. The tools require network access to fetch job listings.
+1. Check that `RAPIDAPI_KEY` is set in `job_scraper/.env`
+2. Check API errors: `curl -s http://localhost:8000/api/errors`
+3. Verify `NVB_DCO_TITLE` matches a valid NVB taxonomy title for your role
 
 ### LaTeX compilation errors
+
 - CV: uses `pdflatex` (standard LaTeX)
-- Cover letter: uses `xelatex` (for custom fonts in `OpenFonts/fonts/`)
-- Make sure your LaTeX distribution includes the `moderncv` package
+- Cover letter: uses `xelatex` (for custom fonts in `cover_letters/OpenFonts/fonts/`)
+- Ensure your LaTeX distribution includes the `moderncv` package
 
 ### Fonts not found in cover letter
+
 The cover letter template expects fonts in `cover_letters/OpenFonts/fonts/`. Make sure this directory exists and contains the Lato and Raleway font files.

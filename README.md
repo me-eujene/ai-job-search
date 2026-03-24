@@ -8,14 +8,14 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 
 ## What this is
 
-A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search skills are built for the Danish market (Jobindex, Jobnet, Akademikernes Jobbank, etc.), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (Indeed NL, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
 
 ```
 /setup          /scrape              /apply <url>
   |                |                     |
   v                v                     v
-Fill in        Search job           Evaluate fit
-your profile   portals              Score & recommend
+Fill in        Run Python           Evaluate fit
+your profile   job scraper          Score & recommend
   |                |                     |
   v                v                     v
 Profile        Present matches      Draft CV + Cover Letter
@@ -26,13 +26,12 @@ files ready    with fit ratings     (LaTeX, tailored)
                -> /apply            -> Revise -> Final output
 ```
 
-The framework encodes career guidance best practices, including structured evaluation criteria, forward-looking cover letter framing, and optional salary benchmarking.
+The framework encodes career guidance best practices, including structured evaluation criteria and forward-looking cover letter framing.
 
 ## Prerequisites
 
 - [Claude Code](https://claude.com/claude-code) (CLI)
 - Python 3.10+
-- [Bun](https://bun.sh) (for Danish job search CLI tools)
 - LaTeX distribution (for compiling CVs and cover letters): [TeX Live](https://tug.org/texlive/) or [MiKTeX](https://miktex.org/)
 
 ## Quick start
@@ -40,20 +39,26 @@ The framework encodes career guidance best practices, including structured evalu
 ### 1. Fork and clone
 
 ```bash
-gh repo fork MadsLorentzen/ai-job-search --clone
+gh repo fork <your-fork> --clone
 cd ai-job-search
 ```
 
-### 2. Install job search tools
+### 2. Install job scraper dependencies
 
 ```bash
-cd .agents/skills/jobbank-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobdanmark-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobindex-search/cli && bun install && cd ../../../..
-cd .agents/skills/jobnet-search/cli && bun install && cd ../../../..
+pip install -r job_scraper/requirements.txt
 ```
 
-### 3. Set up your profile
+### 3. Configure the scraper
+
+```bash
+cp job_scraper/.env.example job_scraper/.env
+# Edit .env: add your RAPIDAPI_KEY and adjust search queries / location
+```
+
+The RapidAPI key powers Indeed NL and LinkedIn NL fetchers (free tier: 200 requests/month). NVB (Nationale Vacaturebank) requires no key.
+
+### 4. Set up your profile
 
 ```bash
 claude
@@ -61,23 +66,23 @@ claude
 /setup
 ```
 
-Claude will ask about your background, skills, and career goals, then populate all profile files automatically. You can import from an existing CV or answer questions interactively. The setup also configures your job search queries so `/scrape` works immediately.
+Claude will ask about your background, skills, and career goals, then populate all profile files automatically. You can import from an existing CV or answer questions interactively.
 
-### 4. Search for jobs
+### 5. Search for jobs
 
 ```bash
 /scrape
 ```
 
-This searches multiple job portals for positions matching your profile, deduplicates results, and presents them sorted by fit. Pick a match to run `/apply` on it directly.
+This starts the Python scraper, fetches from all configured sources, deduplicates against previously seen jobs, and presents matches sorted by fit. Pick a match to run `/apply` on it directly.
 
-### 5. Apply to a job
+### 6. Apply to a job
 
 ```bash
-/apply https://jobindex.dk/job/1234567
+/apply https://www.linkedin.com/jobs/view/123456789
 ```
 
-If the URL can't be fetched (some job portals block automated access), you can paste the job description directly instead:
+If the URL can't be fetched (some portals block automated access), paste the job description directly:
 
 ```bash
 /apply <paste the full job description here>
@@ -97,30 +102,37 @@ ai-job-search/
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
 │   │   │   ├── SKILL.md               # Skill definition
-│   │   │   ├── 01-candidate-profile.md # Your education, experience, skills
-│   │   │   ├── 02-behavioral-profile.md# PI/DISC/personality assessment
-│   │   │   ├── 03-writing-style.md    # Tone, structure, do's and don'ts
-│   │   │   ├── 04-job-evaluation.md   # Scoring framework for job fit
-│   │   │   ├── 05-cv-templates.md     # LaTeX CV structure + tailoring rules
-│   │   │   ├── 06-cover-letter-templates.md # LaTeX cover letter templates
-│   │   │   └── 07-interview-prep.md   # STAR examples + interview framework
-│   │   └── job-scraper/               # Job search orchestration
+│   │   │   ├── 01-candidate-profile.md
+│   │   │   ├── 02-behavioral-profile.md
+│   │   │   ├── 03-writing-style.md
+│   │   │   ├── 04-job-evaluation.md
+│   │   │   ├── 05-cv-templates.md
+│   │   │   ├── 06-cover-letter-templates.md
+│   │   │   └── 07-interview-prep.md
+│   │   └── job-scraper/               # Job search orchestration skill
+│   │       ├── SKILL.md
+│   │       └── search-queries.md      # Populated by /setup
 │   └── settings.local.json            # Claude Code permissions
-├── .agents/skills/                    # Job portal CLI tools (Denmark)
-│   ├── jobbank-search/                # Akademikernes Jobbank
-│   ├── jobdanmark-search/             # Jobdanmark.dk
-│   ├── jobindex-search/               # Jobindex.dk
-│   └── jobnet-search/                 # Jobnet.dk (government portal)
+├── job_scraper/                       # Python job scraper (NL market)
+│   ├── src/
+│   │   ├── pipeline.py                # Orchestrates all fetchers
+│   │   ├── state.py                   # SQLite deduplication store
+│   │   ├── types.py                   # Job dataclass + canonical key
+│   │   ├── helpers.py                 # HTTP client, date utils, title filter
+│   │   └── fetchers/
+│   │       ├── indeed.py              # Indeed NL via RapidAPI (jobs-api14)
+│   │       ├── linkedin.py            # LinkedIn NL via RapidAPI (jobs-api14)
+│   │       └── nvb.py                 # Nationale Vacaturebank (public API)
+│   ├── ui/
+│   │   ├── server.py                  # FastAPI + APScheduler server
+│   │   └── index.html                 # Dashboard
+│   ├── .env.example                   # Configuration template
+│   └── requirements.txt
 ├── cv/
 │   └── main_example.tex               # moderncv LaTeX template
 ├── cover_letters/
 │   ├── cover.cls                      # Custom cover letter LaTeX class
 │   └── OpenFonts/                     # Lato + Raleway fonts
-├── salary_lookup.py                   # Salary benchmarking tool (BYO data)
-├── tools/
-│   ├── convert_salary_excel.py        # Convert salary Excel to JSON
-│   └── README_SALARY_TOOL.md          # Salary tool setup instructions
-├── job_scraper/                       # Scraper state (seen jobs, results)
 ├── job_search_tracker.csv             # Application tracking spreadsheet
 └── SETUP.md                           # Detailed setup guide
 ```
@@ -138,6 +150,20 @@ The `/apply` command runs a **drafter-reviewer workflow**:
 
 All claims in the CV and cover letter are verified against your actual profile. The system never fabricates skills or experience.
 
+## How the job scraper works
+
+The `job_scraper/` pipeline is a Python service with three fetchers:
+
+| Source | Approach | Auth |
+|--------|----------|------|
+| **NVB** (Nationale Vacaturebank) | Public REST API with `dcoTitle` + location filters | None |
+| **Indeed NL** | RapidAPI (jobs-api14) | `RAPIDAPI_KEY` |
+| **LinkedIn NL** | RapidAPI (jobs-api14) | `RAPIDAPI_KEY` |
+
+All sources feed into a shared deduplication store (SQLite). The FastAPI server runs on `localhost:8000` and exposes endpoints for triggering runs and querying results. A scheduler fires the full pipeline Mon-Fri at 07:00 Amsterdam time.
+
+When you run `/scrape`, Claude starts the server if needed, triggers a run, queries the results, and presents them with a quick fit assessment.
+
 ## Customization
 
 ### Which files to edit manually
@@ -152,52 +178,31 @@ If you prefer editing files directly instead of using `/setup`:
 | `04-job-evaluation.md` | Skill match areas, career goals, motivation filters |
 | `05-cv-templates.md` | Profile statement templates for different role types |
 | `07-interview-prep.md` | Your STAR examples from actual experience |
-| `search-queries.md` | Job search queries for your skills and location |
+| `search-queries.md` | Job search queries (used by some WebSearch fallback paths) |
 
-### Updating your search queries
+### Configuring the scraper
 
-As your priorities evolve, you can reconfigure just the job search without re-running the full profile setup:
-
-```
-/setup --section search
-```
-
-This re-runs the search configuration interview: which roles to target, which skills to search for, which locations, and which portals. It also suggests role types you may not have considered based on your profile.
+Edit `job_scraper/.env` to adjust:
+- `SEARCH_QUERIES` — comma-separated queries sent to Indeed and LinkedIn
+- `NVB_DCO_TITLE` — NVB's taxonomy title (e.g. `Productmanager`, `Data Scientist`)
+- `NVB_CITY` / `NVB_DISTANCE_KM` — location filter
+- `TITLE_KEYWORDS` — client-side relevance filter applied to all sources
 
 ### LaTeX templates
 
 The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover letter uses a custom `cover.cls` with Lato/Raleway fonts. You can replace these with your own templates; just update the guidance in `05-cv-templates.md` and `06-cover-letter-templates.md`.
 
-### Job search tools
-
-The four CLI tools in `.agents/skills/` are specific to the **Danish job market** (Jobbank, Jobdanmark, Jobindex, Jobnet). They demonstrate the pattern for building job portal integrations. If you're in a different country, you can build equivalent tools for your local job portals using the same structure.
-
-### Salary benchmarking
-
-The salary tool works with any salary data you provide (union statistics, Glassdoor exports, personal research, etc.). See `tools/README_SALARY_TOOL.md` for the expected format and setup. If you don't have salary data, the salary step is simply skipped.
-
 ## Tips for better results
 
-### Profile depth matters
+**Profile depth matters.** The single biggest factor in output quality is how much detail you put into your profile. Role descriptions with specific projects, tools, and measurable achievements give the system far more to work with than a list of job titles.
 
-The single biggest factor in output quality is how much detail you put into your profile. A thin profile produces generic applications; a detailed one enables genuinely tailored results.
+**Skills in context.** Instead of listing "Python", describe how you applied it: "Built ML pipelines for customer churn prediction using scikit-learn" gives sharper tailoring than "Python, machine learning."
 
-- **Role descriptions:** Don't just list job titles. Describe what you actually did in each position: specific projects, tools used, responsibilities, and measurable achievements. The more material you provide, the more precisely the system can reframe your experience for different roles.
-- **Skills in context:** Instead of listing "Python" or "project management," describe how and where you applied them. "Built ML pipelines for customer churn prediction in Python using scikit-learn" gives the system far more to work with than "Python, machine learning."
-- **Either onboarding path works:** Whether you import an existing CV or answer questions interactively via `/setup`, the principle is the same: richer input produces sharper output.
-
-### Career path discovery
-
-The framework supports two distinct modes of job searching:
-
-- **Explicit targeting:** You know which roles or sectors you want. The system helps refine and prioritize based on fit.
-- **Latent opportunity discovery:** By analyzing your full history (not just job titles, but the actual work you did), the system can surface career paths you haven't considered. Transferable skills that map to unexpected industries, patterns in what you enjoyed or excelled at, or emerging roles that combine your domain expertise with new technology.
-
-To get the most from this, invest time during `/setup` in describing not just your experience, but what energized you, what drained you, and what you'd want more of. This context directly shapes how the system evaluates fit and which roles it surfaces during `/scrape`.
+**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/setup`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
 
 ## Acknowledgements
 
-- [Mikkel Krogholm](https://github.com/mikkelkrogsholm) ([skills repo](https://github.com/mikkelkrogsholm/skills)) for the job search CLI skills
+- [Mikkel Krogholm](https://github.com/mikkelkrogsholm) for the original job search CLI skill pattern this project builds on
 - Built with [Claude Code](https://claude.com/claude-code) by [Anthropic](https://anthropic.com)
 
 ## License

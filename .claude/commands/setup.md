@@ -111,7 +111,7 @@ Ask about:
 - **Key skills as search terms:** "Which of your skills are most likely to appear in job postings?" Pick 3-5 that are distinctive and searchable.
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
-- **Job portals:** "The framework includes tools for Danish job portals (Jobindex, Jobbank, Jobdanmark, Jobnet). Are these the right ones for you, or do you use other sites?" Note: if the user is outside Denmark, acknowledge that the built-in CLI tools are Denmark-specific and suggest they can add their own portal integrations or rely on LinkedIn/Google site-searches.
+- **Scraper configuration:** "The job scraper searches three Dutch sources by default: Nationale Vacaturebank (NVB), Indeed NL, and LinkedIn NL. I'll configure the NVB taxonomy title, city, and search radius for you. For Indeed/LinkedIn, what search terms should I use — specific job titles like 'Product Manager' or 'Data Engineer'?"
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
 - If they have strong Python + domain expertise: "Have you considered roles like 'Technical Consultant' or 'Solutions Engineer' in your domain?"
@@ -152,17 +152,18 @@ Create STAR examples from their actual experience (at least 3-4 examples).
 ### 7. Update `cv/main_example.tex`
 Replace placeholder personal data with their actual name, contact info, and add their education and most recent experience entries.
 
-### 8. Generate `.claude/skills/job-scraper/search-queries.md`
-Replace all placeholder tokens in the search queries file with the user's actual information from Section 9:
-- Replace `[YOUR_PRIMARY_ROLE_TYPE]`, `[YOUR_PRIMARY_JOB_TITLE]`, etc. with actual role titles
-- Replace `[YOUR_KEY_SKILL]`, `[YOUR_DOMAIN_KEYWORD_1]`, etc. with actual skills and domain terms
-- Replace `[YOUR_CITY]`, `[YOUR_COUNTRY]`, `[YOUR_REGION]` with actual location
+### 8. Update `.claude/skills/job-scraper/search-queries.md`
+Replace all placeholder tokens with the user's actual information from Section 9:
+- Replace `[YOUR_PRIMARY_ROLE_TYPE]` and `[YOUR_CITY]` with actual values in the NVB settings block
+- Replace `[YOUR_PRIMARY_JOB_TITLE]`, `[YOUR_SECONDARY_JOB_TITLE]` in `SEARCH_QUERIES` and `TITLE_KEYWORDS`
 - Fill in the location filter tiers (ideal, acceptable, borderline, too far) based on commute constraints
-- Organize queries into priority categories matching the user's career direction:
-  - Priority 1: Their strongest/most desired role direction
-  - Priority 2: Their domain expertise
-  - Priority 3: Adjacent roles they could pivot into
-  - Priority 4: Broader roles (wider net)
+- Set `NVB_DISTANCE_KM` to the appropriate radius
+
+Also write the user's values into `job_scraper/.env` directly (create from `.env.example` if it doesn't exist):
+- Set `SEARCH_QUERIES` to their comma-separated job titles
+- Set `NVB_DCO_TITLE` to the matching NVB taxonomy title
+- Set `NVB_CITY` and `NVB_DISTANCE_KM`
+- Set `TITLE_KEYWORDS` to their title relevance filter phrases
 
 ---
 

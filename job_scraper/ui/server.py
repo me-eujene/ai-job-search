@@ -6,7 +6,6 @@ Endpoints:
   GET  /api/status              Scheduler state + last run
   GET  /api/runs                Last 10 runs from run_log
   GET  /api/errors              Last 20 errors from error_log
-  GET  /api/outputs             List of JSONL output files
   POST /api/scheduler/start     Start the daily scheduler
   POST /api/scheduler/stop      Stop the daily scheduler
   POST /api/run/now             Trigger a full run (all sources)
@@ -23,13 +22,14 @@ import asyncio
 import logging
 import os
 import sys
+from contextlib import asynccontextmanager
 from pathlib import Path
 from datetime import datetime, timezone
 
 # Allow imports from job_scraper root
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from fastapi import FastAPI, BackgroundTasks
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
@@ -49,8 +49,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # App + scheduler
 # ---------------------------------------------------------------------------
-
-app = FastAPI(title="NL Job Scraper", version="1.0.0")
 
 scheduler = AsyncIOScheduler(timezone="Europe/Amsterdam")
 _run_lock = asyncio.Lock()
@@ -83,7 +81,7 @@ async def _run_safe(sources: list[str] | None = None):
         logger.warning("Run requested but a run is already in progress — skipping")
         return
     async with _run_lock:
-        _active_source = "all" if not sources else sources[0]
+        _active_source = "all" if not sources else "+".join(sources)
         try:
             await run_pipeline(sources=sources)
         except Exception as e:
@@ -96,18 +94,18 @@ async def _run_safe(sources: list[str] | None = None):
 # Lifecycle
 # ---------------------------------------------------------------------------
 
-@app.on_event("startup")
-async def on_startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     init_db()
     _schedule_job()
     scheduler.start()
     logger.info("Scheduler started. Next run: %s", _next_run_str())
-
-
-@app.on_event("shutdown")
-async def on_shutdown():
+    yield
     if scheduler.running:
         scheduler.shutdown(wait=False)
+
+
+app = FastAPI(title="NL Job Scraper", version="1.0.0", lifespan=lifespan)
 
 
 # ---------------------------------------------------------------------------
@@ -166,6 +164,11 @@ async def api_jobs(
     ?limit=200          max results (capped at 500)
     ?offset=0           pagination offset
     """
+    if since is not None:
+        try:
+            datetime.strptime(since, "%Y-%m-%d")
+        except ValueError:
+            raise HTTPException(status_code=422, detail="since must be a date in YYYY-MM-DD format")
     limit = min(limit, 500)
     return get_jobs(since=since, source=source, limit=limit, offset=offset)
 

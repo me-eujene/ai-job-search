@@ -1,6 +1,7 @@
 """
 Shared utilities: HTTP client factory, HTML stripping, date helpers, title filter.
 """
+import html as _html
 import os
 import re
 import httpx
@@ -48,12 +49,11 @@ _WHITESPACE_RE = re.compile(r"\s{2,}")
 
 
 def strip_html(html: Optional[str]) -> Optional[str]:
-    """Remove HTML tags and collapse whitespace."""
+    """Remove HTML tags, decode all HTML entities, and collapse whitespace."""
     if not html:
         return html
     text = _TAG_RE.sub(" ", html)
-    text = text.replace("&amp;", "&").replace("&lt;", "<").replace(
-        "&gt;", ">").replace("&nbsp;", " ").replace("&quot;", '"')
+    text = _html.unescape(text)
     return _WHITESPACE_RE.sub(" ", text).strip()
 
 
@@ -86,17 +86,31 @@ def cutoff_date(days: int = 14) -> datetime:
 
 
 def parse_iso(s: Optional[str]) -> Optional[datetime]:
-    """Parse an ISO 8601 string (with or without timezone) to a datetime."""
+    """Parse an ISO 8601 string to a UTC datetime.
+
+    Handles:
+      - Trailing Z          → UTC
+      - +HH:MM offset       → converted to UTC
+      - Bare date YYYY-MM-DD → treated as UTC midnight
+    """
     if not s:
         return None
-    # Strip trailing Z, then parse
-    s = s.rstrip("Z").split("+")[0]
-    for fmt in ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
+    # Normalise Z suffix to +00:00 so fromisoformat handles it uniformly
+    s = s.strip().replace("Z", "+00:00")
+    # Try full ISO 8601 with offset (Python 3.7+)
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S"):
         try:
-            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
+            dt = datetime.strptime(s, fmt)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt.astimezone(timezone.utc)
         except ValueError:
             continue
-    return None
+    # Bare date
+    try:
+        return datetime.strptime(s[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
 
 
 def is_within_days(date_str: Optional[str], days: int = 14) -> bool:

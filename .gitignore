@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-bun.lock
 
 # Python
 __pycache__/
@@ -23,8 +22,7 @@ venv/
 **/.env
 
 # Personal data (never commit these)
-salary_data.json
-job_scraper/seen_jobs.json
+job_scraper/state.db
 job_scraper/*.md
 *_BehavioralReport.pdf
 linkedin_Profile.pdf

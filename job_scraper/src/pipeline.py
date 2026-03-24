@@ -11,7 +11,7 @@ import os
 from typing import Literal
 
 from .helpers import run_id_now, iso_ts, utc_now
-from .state import init_db, is_seen, mark_seen, start_run, finish_run, log_error
+from .state import init_db, mark_seen_if_new, start_run, finish_run, log_error
 from .types import Job
 
 logger = logging.getLogger(__name__)
@@ -87,10 +87,7 @@ async def run_pipeline(sources: list[Source] | None = None) -> dict:
     skipped = 0
 
     for job in all_jobs:
-        if is_seen(job.canonical_key):
-            skipped += 1
-            continue
-        mark_seen(
+        inserted = mark_seen_if_new(
             canonical_key=job.canonical_key,
             title=job.title,
             company=job.company,
@@ -101,7 +98,10 @@ async def run_pipeline(sources: list[Source] | None = None) -> dict:
             description=job.description,
             fetched_at=job.fetched_at,
         )
-        new_jobs_list.append(job)
+        if inserted:
+            new_jobs_list.append(job)
+        else:
+            skipped += 1
 
     new_count = len(new_jobs_list)
     if not new_jobs_list:
