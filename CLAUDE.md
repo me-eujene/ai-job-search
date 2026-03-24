@@ -17,7 +17,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ## Candidate Profile
 
-<!-- This section is auto-populated by /setup. You can also fill it in manually. -->
+<!-- This section is auto-populated by /setup. You can also fill it in manually. IF THIS IS NOT FILLED - ABORT AND RUN /SETUP -->
 
 ### Identity
 - **Name:** [YOUR_NAME]
@@ -82,6 +82,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ## Repo Structure
 - `cv/` - LaTeX CV variants (moderncv template, banking style)
+- `cv/docs` - Existing CVs
 - `cover_letters/` - LaTeX cover letters (custom cover.cls template)
 - `.claude/skills/` - AI skill definitions for the application workflow
 - `job_scraper/` - Python job scraper for the Dutch market (Indeed NL, LinkedIn NL, NVB)
@@ -94,6 +95,12 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 5. Prepare interview talking points based on the role requirements and your strengths
 
 **Important:** When mentioning agentic coding or AI tooling in CVs/cover letters, explicitly reference **Claude Code** by name.
+
+## Workflow for Finding New Jobs (Scraper)
+1. Ensure the scraper server is running (`cd job_scraper && python -m ui.server`) and has completed at least one pipeline run
+2. Say **"find new jobs"** or **"/scrape"** — the `job-scraper` skill queries the API, assesses fit against your profile, and deduplicates against `job_search_tracker.csv`
+3. Review the results table; ask for a detailed evaluation on any interesting listing by number
+4. If you want to apply, the skill flows directly into the application workflow below
 
 ## Verification Checklist
 After creating or updating a CV or cover letter, re-read the generated file and verify **all** of the following before presenting to the user. Report the results as a pass/fail checklist.
