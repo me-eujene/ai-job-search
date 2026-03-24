@@ -18,6 +18,10 @@ venv/
 *.fls
 *.fdb_latexmk
 
+# Environment / secrets (never commit these)
+.env
+**/.env
+
 # Personal data (never commit these)
 salary_data.json
 job_scraper/seen_jobs.json

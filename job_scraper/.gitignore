@@ -1,0 +1,25 @@
+# Secrets
+.env
+
+# Database
+state.db
+state.db-shm
+state.db-wal
+
+# Scraper output (personal job data)
+output/
+
+# Temp / test artefacts
+test.tmp
+*.tmp
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db

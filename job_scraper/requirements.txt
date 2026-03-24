@@ -1,0 +1,13 @@
+# NL Job Scraper — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# HTTP
+httpx>=0.27.0
+
+# API server + scheduler
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+apscheduler>=3.10.4
+
+# Environment variables
+python-dotenv>=1.0.1
