@@ -13,7 +13,7 @@ The `job_scraper/` Python pipeline fetches jobs from three Dutch sources:
 - **Indeed NL** — via RapidAPI (jobs-api14); requires `RAPIDAPI_KEY` in `job_scraper/.env`
 - **LinkedIn NL** — via RapidAPI (jobs-api14); same key as Indeed
 
-State is stored in a SQLite database (`job_scraper/state.db`). A FastAPI server with APScheduler runs the pipeline on a daily schedule (Mon-Fri 07:00 Amsterdam time) and exposes a REST API for manual triggers and job queries.
+State is stored in a SQLite database (`job_scraper/state.db`). The pipeline runs on demand — Claude triggers it directly with a Bash command from the repo root. No server process is needed.
 
 ---
 
@@ -25,42 +25,46 @@ The user triggers the scraping workflow by saying things like:
 - "Any new positions?"
 - "/scrape"
 
-The scraper server and pipeline run are managed externally (scheduled daily or triggered manually by the user). This skill assumes data has already been collected and queries it directly.
+### Step 1: Run the pipeline
 
-### Step 1: Check data availability
-
-Query the API for jobs from the last 14 days:
-
+From the repo root:
 ```bash
-curl -s "http://localhost:8000/api/jobs?since=YYYY-MM-DD"
+python -m job_scraper
 ```
 
-Substitute a date 14 days before today for `YYYY-MM-DD`.
+To run a single source: `python -m job_scraper --sources nvb`
 
-**If the server is unreachable** (connection refused / no response):
-> "The scraper server doesn't appear to be running. Please start it with `cd job_scraper && python -m ui.server` and trigger a run with `curl -X POST http://localhost:8000/api/run/now`, then try again."
-Stop here.
+Wait for the command to complete (typically 10–30 seconds). It writes results to `job_scraper/last_run.json`.
 
-**If the server responds but returns zero jobs:**
-Check the last run timestamp via `curl -s http://localhost:8000/api/status` and errors via `curl -s http://localhost:8000/api/errors`.
-- If the last run was more than 3 days ago, or if there are pipeline errors: prompt the user to trigger a fresh scrape (`curl -X POST http://localhost:8000/api/run/now`) and stop.
-- If the last run was recent and there are no errors: report that no new jobs were found and stop.
+**If the command fails** (import error, missing `.env`, API key not set):
+- Check `job_scraper/.env` exists and contains `RAPIDAPI_KEY`
+- Check dependencies are installed: `pip install -r job_scraper/requirements.txt`
 
-**If jobs are returned**, proceed to Step 2.
+### Step 2: Read results
 
-### Step 2: Quick Fit Assessment
+Read `job_scraper/last_run.json`. The file contains:
+- `run_id`, `started_at`, `finished_at` — run metadata
+- `total_fetched`, `new_jobs`, `skipped` — counts
+- `sources` — per-source counts (e.g. `{"indeed": 3, "nvb": 2}`)
+- `errors` — any fetch errors (empty list = clean run)
+- `jobs` — array of new job objects: `title`, `company`, `location`, `source`, `apply_url`, `date_posted`, `description`
 
-Read `01-candidate-profile.md` and `02-behavioral-profile.md`. For each returned job, do a rapid fit check:
+**If `new_jobs` is 0**: Report that no new jobs were found and stop.
+**If `errors` is non-empty**: Report errors alongside any results found.
+
+### Step 3: Quick Fit Assessment
+
+Read the candidate profile files. For each job in `jobs`, do a rapid fit check:
 
 - **High match**: Role directly involves core skills
 - **Medium match**: Role is adjacent to the candidate's experience
 - **Low match**: Role requires significant skills the candidate lacks
 
-### Step 3: Cross-reference with tracker
+### Step 4: Cross-reference with tracker
 
 Read `job_search_tracker.csv` and skip any jobs whose company+title already appears there (already applied or evaluated).
 
-### Step 4: Present Results
+### Step 5: Present Results
 
 Present new jobs in a table sorted by fit (high first):
 
@@ -175,7 +179,6 @@ The pipeline reads from `job_scraper/.env`. Key variables:
 | `NVB_DISTANCE_KM` | Search radius in km | `40` |
 | `TITLE_KEYWORDS` | Client-side title filter (all sources) | product manager variants |
 | `DB_PATH` | SQLite database path | `job_scraper/state.db` |
-| `PORT` | API server port | `8000` |
 
 Copy `job_scraper/.env.example` to `job_scraper/.env` and fill in values before first use.
 
