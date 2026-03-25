@@ -112,6 +112,7 @@ Ask about:
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
 - **Scraper configuration:** "The job scraper searches three Dutch sources by default: Nationale Vacaturebank (NVB), Indeed NL, and LinkedIn NL. I'll configure the NVB taxonomy title, city, and search radius for you. For Indeed/LinkedIn, what search terms should I use — specific job titles like 'Product Manager' or 'Data Engineer'?"
+- **RapidAPI key:** "Indeed NL and LinkedIn NL require a RapidAPI key (free tier: 200 requests/month). Do you have one? If so, paste it now — if not, NVB will still work without it and you can add it later." Write it to `.env` if provided; if not, leave `RAPIDAPI_KEY` blank and note that only NVB will be active.
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
 - If they have strong Python + domain expertise: "Have you considered roles like 'Technical Consultant' or 'Solutions Engineer' in your domain?"
@@ -160,10 +161,18 @@ Replace all placeholder tokens with the user's actual information from Section 9
 - Set `NVB_DISTANCE_KM` to the appropriate radius
 
 Also write the user's values into `job_scraper/.env` directly (create from `.env.example` if it doesn't exist):
+- Set `RAPIDAPI_KEY` to the key provided in Section 9 (leave blank if not provided)
 - Set `SEARCH_QUERIES` to their comma-separated job titles
 - Set `NVB_DCO_TITLE` to the matching NVB taxonomy title
 - Set `NVB_CITY` and `NVB_DISTANCE_KM`
 - Set `TITLE_KEYWORDS` to their title relevance filter phrases
+
+After writing `.env`, run a quick verification to confirm the scraper works:
+```bash
+pip install -r job_scraper/requirements.txt -q
+python -m job_scraper --sources nvb
+```
+Report the result: how many jobs were fetched, how many are new. If it fails, show the error and suggest fixes (missing `.env`, wrong Python version, etc.). This uses NVB only so it works even without a RapidAPI key.
 
 ---
 
@@ -183,7 +192,7 @@ Present a summary:
 > - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/scrape`
 >
 > **Try it out:**
-> - Run `/scrape` to search for matching jobs right now
+> - The scraper just ran a test — if it found jobs, run `/scrape` to see the full evaluation
 > - Run `/apply` with a job posting URL to see the full application workflow
 > - Run `/setup --section search` later to update your search queries as your priorities evolve
 
