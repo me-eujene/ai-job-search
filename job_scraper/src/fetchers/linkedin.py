@@ -145,11 +145,9 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
     if not title:
         return None
 
-    company_obj = raw.get("organization") or raw.get("company") or {}
-    if isinstance(company_obj, dict):
-        company = company_obj.get("name") or ""
-    else:
-        company = str(company_obj)
+    company = raw.get("companyName") or raw.get("company") or raw.get("organization") or ""
+    if isinstance(company, dict):
+        company = company.get("name") or ""
 
     loc_obj = raw.get("location") or {}
     if isinstance(loc_obj, dict):
@@ -167,7 +165,7 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
         dt2 = parse_iso(date_raw)
         date_posted = iso_date(dt2) if dt2 else ""
 
-    apply_url = raw.get("detailsPageUrl") or raw.get("url") or ""
+    apply_url = raw.get("linkedinUrl") or raw.get("detailsPageUrl") or raw.get("url") or ""
 
     description = raw.get("description") or raw.get("snippet") or None
 

@@ -32,7 +32,8 @@ If the user provides a CV/resume:
 2. Extract all structured information: name, contact, education, experience, skills, publications, awards
 3. Present a summary of what was extracted
 4. Ask follow-up questions for gaps (behavioral profile, career goals, deal-breakers, salary expectations, references)
-5. Proceed to file generation (Step 3)
+5. Complete Section 9 (Job Search Configuration) — this step is mandatory even in Path A. Ask about target job titles, key skills as search terms, geographic scope, and scraper configuration. Then proactively suggest role types the user may not have considered (see Section 9 below).
+6. Proceed to file generation (Step 3)
 
 ---
 
@@ -112,7 +113,7 @@ Ask about:
 - **Target companies (optional):** "Are there specific companies you'd like to monitor for openings?"
 - **Geographic scope:** "Which cities or regions should I search in? How far are you willing to commute?" Use this to define the location filter tiers (ideal, acceptable, borderline, too far).
 - **Scraper configuration:** "The job scraper searches three Dutch sources by default: Nationale Vacaturebank (NVB), Indeed NL, and LinkedIn NL. I'll configure the NVB taxonomy title, city, and search radius for you. For Indeed/LinkedIn, what search terms should I use — specific job titles like 'Product Manager' or 'Data Engineer'?"
-- **RapidAPI key:** "Indeed NL and LinkedIn NL require a RapidAPI key (free tier: 200 requests/month). Do you have one? If so, paste it now — if not, NVB will still work without it and you can add it later." Write it to `.env` if provided; if not, leave `RAPIDAPI_KEY` blank and note that only NVB will be active.
+- **RapidAPI key:** First check whether `job_scraper/.env` already contains a non-empty `RAPIDAPI_KEY`. If yes, report: "Your RapidAPI key is already configured — Indeed NL and LinkedIn NL are active." Do not re-ask. If not set, ask: "Indeed NL and LinkedIn NL require a RapidAPI key (free tier: 200 requests/month). Do you have one? If so, paste it now — if not, NVB will still work without it and you can add it later." Write it to `.env` if provided; if not, leave `RAPIDAPI_KEY` blank and note that only NVB will be active.
 
 **Important:** Also suggest role types the user may not have considered, based on their skill profile. For example:
 - If they have strong Python + domain expertise: "Have you considered roles like 'Technical Consultant' or 'Solutions Engineer' in your domain?"

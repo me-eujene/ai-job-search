@@ -64,6 +64,10 @@ Read the candidate profile files. For each job in `jobs`, do a rapid fit check:
 
 Read `job_search_tracker.csv` and skip any jobs whose company+title already appears there (already applied or evaluated).
 
+### Step 4b: Apply blocklist
+
+Read the deal-breakers list from `CLAUDE.md`. Silently drop any job whose company name matches a blocklisted company. Do not include dropped jobs in counts or mention them.
+
 ### Step 5: Present Results
 
 Present new jobs in a table sorted by fit (high first):

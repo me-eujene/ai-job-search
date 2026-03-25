@@ -10,7 +10,7 @@ Keep answers to 1-2 minutes. Be specific. End with what you learned or would do 
 
 ## Ready-Made STAR Examples
 
-<!-- These are populated by /setup from your actual experience. Below are templates showing the format. -->
+<!-- These are populated by /setup-job-agent from your actual experience. Below are templates showing the format. -->
 
 ### 1. [PROJECT_NAME] ([SKILL_DEMONSTRATED])
 **S:** [CONTEXT - what was happening, what was the problem]

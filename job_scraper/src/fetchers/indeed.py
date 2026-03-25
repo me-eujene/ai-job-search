@@ -15,6 +15,7 @@ Key findings from live tests (2026-03-23):
 """
 import logging
 import os
+from datetime import datetime, timezone
 from typing import Optional
 
 import httpx
@@ -145,30 +146,33 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
         return None
 
     # Company
-    company_obj = raw.get("organization") or raw.get("company") or {}
-    if isinstance(company_obj, dict):
-        company = company_obj.get("name") or company_obj.get("display_name") or ""
-    else:
-        company = str(company_obj)
+    company = raw.get("companyName") or raw.get("company") or raw.get("organization") or ""
+    if isinstance(company, dict):
+        company = company.get("name") or company.get("display_name") or ""
 
-    # Location
+    # Location — API returns { "location": str, "country": str, "countryCode": str }
     loc_obj = raw.get("location") or {}
     if isinstance(loc_obj, dict):
-        city    = loc_obj.get("city") or loc_obj.get("display") or ""
-        country = loc_obj.get("country") or "NL"
+        city        = loc_obj.get("location") or loc_obj.get("city") or loc_obj.get("display") or ""
+        country_val = loc_obj.get("countryCode") or loc_obj.get("country") or "NL"
     else:
-        city    = str(loc_obj)
-        country = "NL"
+        city        = str(loc_obj)
+        country_val = "NL"
 
-    if country not in ("NL", "Netherlands", "nederland"):
+    if country_val not in ("NL", "Netherlands", "nederland"):
         return None
 
-    # Date
-    date_raw  = raw.get("datePosted") or raw.get("datePublished") or ""
-    dt = parse_iso(date_raw)
-    date_posted = iso_date(dt) if dt else ""
+    # Date — prefer timestamp, fall back to datePosted string
+    ts_ms = raw.get("datePublishedTimestamp")
+    if ts_ms:
+        dt = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
+        date_posted = iso_date(dt)
+    else:
+        date_raw = raw.get("datePosted") or raw.get("datePublished") or ""
+        dt2 = parse_iso(date_raw)
+        date_posted = iso_date(dt2) if dt2 else ""
 
-    apply_url = raw.get("detailsPageUrl") or raw.get("url") or ""
+    apply_url = raw.get("applyUrl") or raw.get("detailsPageUrl") or raw.get("url") or ""
 
     description = raw.get("description") or raw.get("snippet") or None
 

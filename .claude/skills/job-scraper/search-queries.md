@@ -84,7 +84,7 @@ Acceptable commute areas (for Claude to use when assessing fit):
 Re-run setup to reconfigure search without touching your profile:
 
 ```
-/setup-job-agent-job-agent --section search
+/setup-job-agent --section search
 ```
 
 Or edit `job_scraper/.env` directly and restart the server:
