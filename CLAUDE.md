@@ -97,10 +97,9 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 **Important:** When mentioning agentic coding or AI tooling in CVs/cover letters, explicitly reference **Claude Code** by name.
 
 ## Workflow for Finding New Jobs (Scraper)
-1. Ensure the scraper server is running (`cd job_scraper && python -m ui.server`) and has completed at least one pipeline run
-2. Say **"find new jobs"** or **"/scrape"** — the `job-scraper` skill queries the API, assesses fit against your profile, and deduplicates against `job_search_tracker.csv`
-3. Review the results table; ask for a detailed evaluation on any interesting listing by number
-4. If you want to apply, the skill flows directly into the application workflow below
+1. Say **"find new jobs"** or **"/scrape"** — the `job-scraper` skill runs the pipeline directly, reads `job_scraper/last_run.json`, assesses fit against your profile, and deduplicates against `job_search_tracker.csv`
+2. Review the results table; ask for a detailed evaluation on any interesting listing by number
+3. If you want to apply, the skill flows directly into the application workflow below
 
 ## Verification Checklist
 After creating or updating a CV or cover letter, re-read the generated file and verify **all** of the following before presenting to the user. Report the results as a pass/fail checklist.
@@ -146,18 +145,13 @@ cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 # Install dependencies (first time)
 pip install -r job_scraper/requirements.txt
 
-# Start the scraper server
-cd job_scraper && python -m ui.server
+# Run the scraper (all sources)
+python -m job_scraper
 
-# Trigger a run manually
-curl -s -X POST http://localhost:8000/api/run/now
+# Run a single source
+python -m job_scraper --sources nvb
 
-# Query new jobs (last 14 days)
-curl -s "http://localhost:8000/api/jobs?since=$(date -d '14 days ago' +%Y-%m-%d)"
-
-# Check status / errors
-curl -s http://localhost:8000/api/status
-curl -s http://localhost:8000/api/errors
+# Results are written to job_scraper/last_run.json
 ```
 
 
@@ -167,7 +161,7 @@ curl -s http://localhost:8000/api/errors
 The repo has two distinct layers of AI tooling that work differently:
 
 - **`.claude/skills/`** — Claude Code skills (Markdown). These are loaded by the `Skill` tool and give Claude instructions. They are not executed; they shape Claude's behavior. The `job-application-assistant` skill (7 reference files) and `job-scraper` skill live here.
-- **`job_scraper/`** — Python service with a REST API. Claude triggers it via `curl` and queries results via `/api/jobs`. Uses FastAPI + APScheduler; state in SQLite (`state.db`).
+- **`job_scraper/`** — Python CLI package. Claude runs `python -m job_scraper` directly via Bash. The pipeline fetches from external APIs, deduplicates against SQLite (`state.db`), and writes new jobs to `job_scraper/last_run.json` which Claude reads with the Read tool.
 
 ### Drafter-reviewer pattern (`/apply`)
 The `/apply` command (`.claude/commands/apply.md`) orchestrates a two-agent loop:
