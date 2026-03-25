@@ -50,7 +50,7 @@ If you want to review or adjust what is permitted, open the file:
 ```
 
 Key permissions pre-approved:
-- `Skill(job-scraper)` — lets Claude run `/scrape` without prompting
+- `Skill(job-scraper)` — lets Claude run `/job-scraper-run` without prompting
 - `Bash(python:*)` / `Bash(python3:*)` — runs the job scraper
 - `Bash(git:*)` — lets Claude commit and push
 - `Bash(gh repo:*)` — GitHub CLI operations
@@ -110,7 +110,7 @@ Both paths produce the same result: fully populated profile files.
 | `05-cv-templates.md` | CV templates with your profile statements |
 | `07-interview-prep.md` | STAR examples from your experience |
 | `cv/main_<lastname>.tex` | Your LaTeX CV (copied from `main_example.tex`) |
-| `search-queries.md` | Job search queries for `/scrape` fallback |
+| `search-queries.md` | Job search queries for `/job-scraper-run` fallback |
 
 ### Re-running setup
 
@@ -129,7 +129,7 @@ The `--section search` option is especially useful as your priorities evolve.
 ### Search for jobs
 
 ```
-/scrape
+/job-scraper-run
 ```
 
 Claude runs the Python scraper, fetches from all configured sources, and presents matches. Typical first run takes 10–30 seconds.

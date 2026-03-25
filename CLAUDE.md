@@ -97,7 +97,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 **Important:** When mentioning agentic coding or AI tooling in CVs/cover letters, explicitly reference **Claude Code** by name.
 
 ## Workflow for Finding New Jobs (Scraper)
-1. Say **"find new jobs"** or **"/scrape"** — the `job-scraper` skill runs the pipeline directly, reads `job_scraper/last_run.json`, assesses fit against your profile, and deduplicates against `job_search_tracker.csv`
+1. Say **"find new jobs"** or **"/job-scraper-run"** — the `job-scraper` skill runs the pipeline directly, reads `job_scraper/last_run.json`, assesses fit against your profile, and deduplicates against `job_search_tracker.csv`
 2. Review the results table; ask for a detailed evaluation on any interesting listing by number
 3. If you want to apply, the skill flows directly into the application workflow below
 
@@ -175,7 +175,7 @@ This pattern separates research/critique from authoring to reduce confirmation b
 `/job-scraper-setup` populates data into multiple files simultaneously. All of these must stay in sync:
 - `CLAUDE.md` (this file) — always loaded, candidate profile + workflow rules
 - `.claude/skills/job-application-assistant/01-candidate-profile.md` — detailed structured profile read by both drafter and reviewer
-- `.claude/skills/job-scraper/search-queries.md` — search queries used by `/scrape`
+- `.claude/skills/job-scraper/search-queries.md` — search queries used by `/job-scraper-run`
 
 The `cv/main_example.tex` file is the **LaTeX template seed**; `/job-scraper-apply` copies and tailors it into `cv/main_<company>.tex`.
 

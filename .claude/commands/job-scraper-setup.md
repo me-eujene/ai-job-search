@@ -105,7 +105,7 @@ For each reference:
 - Relationship to the user
 
 ### Section 9: Job Search Configuration
-This section generates the search queries that power `/scrape`. Use the information from Sections 1, 4, and 7 to build targeted queries.
+This section generates the search queries that power `/job-scraper-run`. Use the information from Sections 1, 4, and 7 to build targeted queries.
 
 Ask about:
 - **Role titles to search for:** "What job titles should I search for? For example: Data Scientist, ML Engineer, Geophysicist." Collect 3-8 specific titles.
@@ -190,10 +190,10 @@ Present a summary:
 > - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
 > - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience
 > - `cv/main_<lastname>.tex` - Your LaTeX CV base (copied from `main_example.tex`)
-> - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/scrape`
+> - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/job-scraper-run`
 >
 > **Try it out:**
-> - The scraper just ran a test — if it found jobs, run `/scrape` to see the full evaluation
+> - The scraper just ran a test — if it found jobs, run `/job-scraper-run` to see the full evaluation
 > - Run `/job-scraper-apply` with a job posting URL to see the full application workflow
 > - Run `/job-scraper-setup --section search` later to update your search queries as your priorities evolve
 
@@ -206,4 +206,4 @@ Present a summary:
 - Synthesize answers into structured formats (the user doesn't need to know markdown or LaTeX)
 - Can be re-run with `--section <name>` to update specific sections (e.g., `/job-scraper-setup --section search` to reconfigure job search queries without re-doing the full profile)
 - Section 9 (search) proactively suggests role types the user may not have considered
-- At the end, suggest running `/scrape` and `/job-scraper-apply` with a test job posting
+- At the end, suggest running `/job-scraper-run` and `/job-scraper-apply` with a test job posting

@@ -1,6 +1,6 @@
 ---
 name: job-scraper
-description: "Searches Dutch job sites (Indeed NL, LinkedIn NL, Nationale Vacaturebank) for new positions, evaluates fit, and assists with applications: tailoring CVs, writing cover letters, and preparing for interviews. Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, /scrape, job posting, job application, CV, cover letter, resume, interview prep, job fit, career, application, apply"
+description: "Searches Dutch job sites (Indeed NL, LinkedIn NL, Nationale Vacaturebank) for new positions, evaluates fit, and assists with applications: tailoring CVs, writing cover letters, and preparing for interviews. Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, /job-scraper-run, job posting, job application, CV, cover letter, resume, interview prep, job fit, career, application, apply"
 allowed-tools: "Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUserQuestion, Bash"
 ---
 
@@ -23,7 +23,7 @@ The user triggers the scraping workflow by saying things like:
 - "Find new jobs"
 - "Scrape for jobs"
 - "Any new positions?"
-- "/scrape"
+- "/job-scraper-run"
 
 ### Step 1: Run the pipeline
 

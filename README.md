@@ -11,7 +11,7 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (Indeed NL, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
 
 ```
-/job-scraper-setup          /scrape              /job-scraper-apply <url>
+/job-scraper-setup          /job-scraper-run              /job-scraper-apply <url>
   |                |                     |
   v                v                     v
 Fill in        Run Python           Evaluate fit
@@ -23,7 +23,7 @@ files ready    with fit ratings     (LaTeX, tailored)
                    |                     |
                    v                     v
                Pick a match         Reviewer agent critiques
-               -> /job-scraper-apply            -> Revise -> Final output
+               -> /job-scraper-apply  -> Revise -> Final output
 ```
 
 The framework encodes career guidance best practices, including structured evaluation criteria and forward-looking cover letter framing.
@@ -71,7 +71,7 @@ Claude will ask about your background, skills, and career goals, then populate a
 ### 5. Search for jobs
 
 ```bash
-/scrape
+/job-scraper-run
 ```
 
 This starts the Python scraper, fetches from all configured sources, deduplicates against previously seen jobs, and presents matches sorted by fit. Pick a match to run `/job-scraper-apply` on it directly.
@@ -97,8 +97,8 @@ ai-job-search/
 ├── CLAUDE.md                          # Main candidate profile + workflow rules
 ├── .claude/
 │   ├── commands/
-│   │   ├── apply.md                   # /job-scraper-apply workflow (drafter-reviewer)
-│   │   └── setup-job-agent.md          # /job-scraper-setup onboarding interview
+│   │   ├── job-scraper-apply.md       # /job-scraper-apply workflow (drafter-reviewer)
+│   │   └── job-scraper-setup.md       # /job-scraper-setup onboarding interview
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
 │   │   │   ├── SKILL.md               # Skill definition
@@ -133,6 +133,16 @@ ai-job-search/
 ├── job_search_tracker.csv             # Application tracking spreadsheet
 └── SETUP.md                           # Detailed setup guide
 ```
+
+## Commands
+
+| Command | What it does |
+|---------|-------------|
+| `/job-scraper-setup` | Profile onboarding interview — populates all profile files from your CV or via Q&A. Re-run with `--section search` to update search config only. |
+| `/job-scraper-run` | Runs the Python job scraper, deduplicates results, evaluates fit against your profile, and presents a ranked table of new positions. |
+| `/job-scraper-apply <url or text>` | Full application workflow — evaluates fit, drafts a tailored CV + cover letter in LaTeX, runs a reviewer agent, and presents the final output. |
+
+---
 
 ## How `/job-scraper-apply` works
 
