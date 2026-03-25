@@ -23,3 +23,6 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated run state
+last_run.json
