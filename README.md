@@ -98,7 +98,7 @@ ai-job-search/
 ├── .claude/
 │   ├── commands/
 │   │   ├── apply.md                   # /apply workflow (drafter-reviewer)
-│   │   └── setup-job-agent.md          # /setup-job-agent-job-agent onboarding interview
+│   │   └── setup-job-agent.md          # /setup-job-agent onboarding interview
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
 │   │   │   ├── SKILL.md               # Skill definition
@@ -123,9 +123,6 @@ ai-job-search/
 │   │       ├── indeed.py              # Indeed NL via RapidAPI (jobs-api14)
 │   │       ├── linkedin.py            # LinkedIn NL via RapidAPI (jobs-api14)
 │   │       └── nvb.py                 # Nationale Vacaturebank (public API)
-│   ├── ui/
-│   │   ├── server.py                  # FastAPI + APScheduler server
-│   │   └── index.html                 # Dashboard
 │   ├── .env.example                   # Configuration template
 │   └── requirements.txt
 ├── cv/
@@ -160,15 +157,13 @@ The `job_scraper/` pipeline is a Python service with three fetchers:
 | **Indeed NL** | RapidAPI (jobs-api14) | `RAPIDAPI_KEY` |
 | **LinkedIn NL** | RapidAPI (jobs-api14) | `RAPIDAPI_KEY` |
 
-All sources feed into a shared deduplication store (SQLite). The FastAPI server runs on `localhost:8000` and exposes endpoints for triggering runs and querying results. A scheduler fires the full pipeline Mon-Fri at 07:00 Amsterdam time.
-
-When you run `/scrape`, Claude starts the server if needed, triggers a run, queries the results, and presents them with a quick fit assessment.
+All sources feed into a shared deduplication store (SQLite). Claude runs `python -m job_scraper` directly — no server process needed. Results are written to `job_scraper/last_run.json` and read back by Claude via the Read tool.
 
 ## Customization
 
 ### Which files to edit manually
 
-If you prefer editing files directly instead of using `/setup-job-agent-job-agent`:
+If you prefer editing files directly instead of using `/setup-job-agent`:
 
 | File | What to change |
 |------|---------------|
@@ -198,7 +193,7 @@ The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover
 
 **Skills in context.** Instead of listing "Python", describe how you applied it: "Built ML pipelines for customer churn prediction using scikit-learn" gives sharper tailoring than "Python, machine learning."
 
-**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/setup-job-agent-job-agent`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
+**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/setup-job-agent`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
 
 ## Acknowledgements
 

@@ -91,7 +91,7 @@ Both paths produce the same result: fully populated profile files.
 | `04-job-evaluation.md` | Personalized skill match areas and career goals |
 | `05-cv-templates.md` | CV templates with your profile statements |
 | `07-interview-prep.md` | STAR examples from your experience |
-| `cv/main_example.tex` | Your LaTeX CV template |
+| `cv/main_<lastname>.tex` | Your LaTeX CV (copied from `main_example.tex`) |
 | `search-queries.md` | Job search queries for `/scrape` fallback |
 
 ### Re-running setup
@@ -99,9 +99,9 @@ Both paths produce the same result: fully populated profile files.
 Update specific sections later without re-doing the full profile:
 
 ```
-/setup-job-agent-job-agent --section skills
-/setup-job-agent-job-agent --section experience
-/setup-job-agent-job-agent --section search
+/setup-job-agent --section skills
+/setup-job-agent --section experience
+/setup-job-agent --section search
 ```
 
 The `--section search` option is especially useful as your priorities evolve.
@@ -114,7 +114,7 @@ The `--section search` option is especially useful as your priorities evolve.
 /scrape
 ```
 
-Claude starts the job scraper server, triggers a run, and presents matches. Typical first run takes 30–60 seconds.
+Claude runs the Python scraper, fetches from all configured sources, and presents matches. Typical first run takes 10–30 seconds.
 
 ### Apply to a job
 
@@ -151,8 +151,8 @@ cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 
 ### Scraper not returning results
 
-1. Check that `RAPIDAPI_KEY` is set in `job_scraper/.env`
-2. Check API errors: `curl -s http://localhost:8000/api/errors`
+1. Check that `job_scraper/.env` exists (copy from `.env.example` if not)
+2. For Indeed/LinkedIn results: ensure `RAPIDAPI_KEY` is set in `.env`; NVB works without a key
 3. Verify `NVB_DCO_TITLE` matches a valid NVB taxonomy title for your role
 
 ### LaTeX compilation errors
