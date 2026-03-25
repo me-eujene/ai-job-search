@@ -197,7 +197,7 @@ The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover
 
 ## Acknowledgements
 
-- [Mikkel Krogholm](https://github.com/mikkelkrogsholm) for the original job search CLI skill pattern this project builds on
+- [Mads Lorentzen](https://github.com/MadsLorentzen) — the Claude Code skill files (`01–07`), LaTeX CV/cover letter templates, and application workflow in this repo are adapted from his [ai-job-search](https://github.com/MadsLorentzen/ai-job-search) original. The Python job scraper was rebuilt independently.
 - Built with [Claude Code](https://claude.com/claude-code) by [Anthropic](https://anthropic.com)
 
 ## License
