@@ -39,7 +39,25 @@ gh repo fork <your-fork> --clone
 cd ai-job-search
 ```
 
-## 3. Install scraper dependencies
+## 3. Enable skills and permissions
+
+The repo ships with a `.claude/settings.local.json` that pre-approves the skills and Bash commands Claude needs. Claude Code loads this automatically when you run `claude` inside the repo — no extra steps required.
+
+If you want to review or adjust what is permitted, open the file:
+
+```
+.claude/settings.local.json
+```
+
+Key permissions pre-approved:
+- `Skill(job-scraper)` — lets Claude run `/scrape` without prompting
+- `Bash(python:*)` / `Bash(python3:*)` — runs the job scraper
+- `Bash(git:*)` — lets Claude commit and push
+- `Bash(gh repo:*)` — GitHub CLI operations
+
+To add or remove permissions, run `/update-config` inside Claude Code and describe the change in plain English.
+
+## 5. Install scraper dependencies
 
 ```bash
 pip install -r job_scraper/requirements.txt
@@ -60,7 +78,7 @@ Open `job_scraper/.env` and fill in:
 
 NVB (Nationale Vacaturebank) requires no API key.
 
-## 5. Run the setup interview
+## 6. Run the setup interview
 
 Start Claude Code in the repository:
 
@@ -71,7 +89,7 @@ claude
 Then run the onboarding:
 
 ```
-/setup-job-agent
+/job-scraper-setup
 ```
 
 Claude will offer two paths:
@@ -99,14 +117,14 @@ Both paths produce the same result: fully populated profile files.
 Update specific sections later without re-doing the full profile:
 
 ```
-/setup-job-agent --section skills
-/setup-job-agent --section experience
-/setup-job-agent --section search
+/job-scraper-setup --section skills
+/job-scraper-setup --section experience
+/job-scraper-setup --section search
 ```
 
 The `--section search` option is especially useful as your priorities evolve.
 
-## 6. Test the workflow
+## 7. Test the workflow
 
 ### Search for jobs
 
@@ -119,13 +137,13 @@ Claude runs the Python scraper, fetches from all configured sources, and present
 ### Apply to a job
 
 ```
-/apply https://www.linkedin.com/jobs/view/123456789
+/job-scraper-apply https://www.linkedin.com/jobs/view/123456789
 ```
 
 Or paste the job description directly:
 
 ```
-/apply [paste job posting text here]
+/job-scraper-apply [paste job posting text here]
 ```
 
 Claude will:
@@ -135,9 +153,9 @@ Claude will:
 4. Have a reviewer agent critique the drafts
 5. Revise and present the final output
 
-## 7. Compile your documents
+## 8. Compile your documents
 
-After `/apply` creates the LaTeX files:
+After `/job-scraper-apply` creates the LaTeX files:
 
 ```bash
 # Compile CV (pdflatex)

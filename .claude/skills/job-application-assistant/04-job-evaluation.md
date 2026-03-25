@@ -1,6 +1,6 @@
 # Job Evaluation Framework
 
-<!-- SETUP: Skill match areas and career goals are personalized by running /setup-job-agent -->
+<!-- SETUP: Skill match areas and career goals are personalized by running /job-scraper-setup -->
 
 ## Scoring Dimensions
 

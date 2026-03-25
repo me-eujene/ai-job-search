@@ -1,6 +1,6 @@
 # CV Templates and Tailoring Guide
 
-<!-- SETUP: Profile statements and section ordering are personalized by running /setup-job-agent -->
+<!-- SETUP: Profile statements and section ordering are personalized by running /job-scraper-setup -->
 
 ## Template: LaTeX moderncv (Banking Style)
 

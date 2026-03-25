@@ -1,7 +1,7 @@
 # Candidate Profile
 
-<!-- SETUP: This file is populated by running /setup-job-agent -->
-<!-- After running /setup-job-agent, all sections will be filled with your actual information -->
+<!-- SETUP: This file is populated by running /job-scraper-setup -->
+<!-- After running /job-scraper-setup, all sections will be filled with your actual information -->
 
 ## Identity
 - **Name:** [YOUR_NAME]

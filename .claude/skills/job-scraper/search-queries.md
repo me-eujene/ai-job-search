@@ -1,6 +1,6 @@
 # Job Scraper Configuration
 
-<!-- SETUP: Populated by /setup-job-agent -- section search -->
+<!-- SETUP: Populated by /job-scraper-setup -- section search -->
 <!-- Describes the .env variables that control the Python scraper in job_scraper/ -->
 
 ## How the scraper is configured
@@ -84,7 +84,7 @@ Acceptable commute areas (for Claude to use when assessing fit):
 Re-run setup to reconfigure search without touching your profile:
 
 ```
-/setup-job-agent --section search
+/job-scraper-setup --section search
 ```
 
 Or edit `job_scraper/.env` directly and restart the server:

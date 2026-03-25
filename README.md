@@ -11,7 +11,7 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (Indeed NL, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
 
 ```
-/setup-job-agent          /scrape              /apply <url>
+/job-scraper-setup          /scrape              /job-scraper-apply <url>
   |                |                     |
   v                v                     v
 Fill in        Run Python           Evaluate fit
@@ -23,7 +23,7 @@ files ready    with fit ratings     (LaTeX, tailored)
                    |                     |
                    v                     v
                Pick a match         Reviewer agent critiques
-               -> /apply            -> Revise -> Final output
+               -> /job-scraper-apply            -> Revise -> Final output
 ```
 
 The framework encodes career guidance best practices, including structured evaluation criteria and forward-looking cover letter framing.
@@ -63,7 +63,7 @@ The RapidAPI key powers Indeed NL and LinkedIn NL fetchers (free tier: 200 reque
 ```bash
 claude
 # Then inside Claude Code:
-/setup-job-agent
+/job-scraper-setup
 ```
 
 Claude will ask about your background, skills, and career goals, then populate all profile files automatically. You can import from an existing CV or answer questions interactively.
@@ -74,18 +74,18 @@ Claude will ask about your background, skills, and career goals, then populate a
 /scrape
 ```
 
-This starts the Python scraper, fetches from all configured sources, deduplicates against previously seen jobs, and presents matches sorted by fit. Pick a match to run `/apply` on it directly.
+This starts the Python scraper, fetches from all configured sources, deduplicates against previously seen jobs, and presents matches sorted by fit. Pick a match to run `/job-scraper-apply` on it directly.
 
 ### 6. Apply to a job
 
 ```bash
-/apply https://www.linkedin.com/jobs/view/123456789
+/job-scraper-apply https://www.linkedin.com/jobs/view/123456789
 ```
 
 If the URL can't be fetched (some portals block automated access), paste the job description directly:
 
 ```bash
-/apply <paste the full job description here>
+/job-scraper-apply <paste the full job description here>
 ```
 
 This runs the full workflow: evaluate fit, draft CV + cover letter, review with a second agent, revise, and present the final output.
@@ -97,8 +97,8 @@ ai-job-search/
 ├── CLAUDE.md                          # Main candidate profile + workflow rules
 ├── .claude/
 │   ├── commands/
-│   │   ├── apply.md                   # /apply workflow (drafter-reviewer)
-│   │   └── setup-job-agent.md          # /setup-job-agent onboarding interview
+│   │   ├── apply.md                   # /job-scraper-apply workflow (drafter-reviewer)
+│   │   └── setup-job-agent.md          # /job-scraper-setup onboarding interview
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
 │   │   │   ├── SKILL.md               # Skill definition
@@ -111,7 +111,7 @@ ai-job-search/
 │   │   │   └── 07-interview-prep.md
 │   │   └── job-scraper/               # Job search orchestration skill
 │   │       ├── SKILL.md
-│   │       └── search-queries.md      # Populated by /setup-job-agent
+│   │       └── search-queries.md      # Populated by /job-scraper-setup
 │   └── settings.local.json            # Claude Code permissions
 ├── job_scraper/                       # Python job scraper (NL market)
 │   ├── src/
@@ -134,9 +134,9 @@ ai-job-search/
 └── SETUP.md                           # Detailed setup guide
 ```
 
-## How `/apply` works
+## How `/job-scraper-apply` works
 
-The `/apply` command runs a **drafter-reviewer workflow**:
+The `/job-scraper-apply` command runs a **drafter-reviewer workflow**:
 
 1. **Parse** the job posting (URL or text)
 2. **Evaluate fit** against your profile (skills, experience, culture, location, career alignment)
@@ -163,7 +163,7 @@ All sources feed into a shared deduplication store (SQLite). Claude runs `python
 
 ### Which files to edit manually
 
-If you prefer editing files directly instead of using `/setup-job-agent`:
+If you prefer editing files directly instead of using `/job-scraper-setup`:
 
 | File | What to change |
 |------|---------------|
@@ -193,7 +193,7 @@ The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover
 
 **Skills in context.** Instead of listing "Python", describe how you applied it: "Built ML pipelines for customer churn prediction using scikit-learn" gives sharper tailoring than "Python, machine learning."
 
-**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/setup-job-agent`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
+**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/job-scraper-setup`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
 
 ## Acknowledgements
 

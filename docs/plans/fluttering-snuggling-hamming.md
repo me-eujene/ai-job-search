@@ -2,10 +2,10 @@
 
 ## Context
 
-Reviewing the conversation where `/setup-job-agent` (command) and `job-scraper` (skill) were executed for the first time against their definitions, to identify where behavior diverged from spec or real-usage gaps were exposed.
+Reviewing the conversation where `/job-scraper-setup` (command) and `job-scraper` (skill) were executed for the first time against their definitions, to identify where behavior diverged from spec or real-usage gaps were exposed.
 
 **File taxonomy:**
-- **Commands** (user-invoked with `/`): `.claude/commands/setup-job-agent.md`, `.claude/commands/apply.md`
+- **Commands** (user-invoked with `/`): `.claude/commands/job-scraper-setup.md`, `.claude/commands/apply.md`
 - **Skill** (auto-loaded by trigger): `.claude/skills/job-scraper/SKILL.md` + reference files in `job-application-assistant/`
 - **Python pipeline**: `job_scraper/src/fetchers/`
 
@@ -75,7 +75,7 @@ Reviewing the conversation where `/setup-job-agent` (command) and `job-scraper` 
 |------|-------------|
 | `.claude/skills/job-scraper/SKILL.md` | Add blocklist filter step before presenting results |
 | `.claude/skills/job-scraper/search-queries.md` | Replace 2 placeholder tokens |
-| `.claude/commands/setup-job-agent.md` | (a) Mandate proactive role suggestions even in import path; (b) check for existing RAPIDAPI_KEY before asking |
+| `.claude/commands/job-scraper-setup.md` | (a) Mandate proactive role suggestions even in import path; (b) check for existing RAPIDAPI_KEY before asking |
 | `job_scraper/src/fetchers/indeed.py` | Fix field name mismatches for location and apply_url |
 | `job_scraper/state.db` | Purge 8 blank-company LinkedIn ghost entries |
 

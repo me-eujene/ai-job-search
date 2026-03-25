@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Job Application Assistant for [YOUR_NAME]
 
-<!-- SETUP: This file is populated by running /setup-job-agent -->
-<!-- After running /setup-job-agent, all [PLACEHOLDER] tokens will be replaced with your actual information -->
+<!-- SETUP: This file is populated by running /job-scraper-setup -->
+<!-- After running /job-scraper-setup, all [PLACEHOLDER] tokens will be replaced with your actual information -->
 
 ## Role
 This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
@@ -17,7 +17,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ## Candidate Profile
 
-<!-- This section is auto-populated by /setup-job-agent. You can also fill it in manually. IF THIS IS NOT FILLED - ABORT AND RUN /SETUP-JOB-AGENT -->
+<!-- This section is auto-populated by /job-scraper-setup. You can also fill it in manually. IF THIS IS NOT FILLED - ABORT AND RUN /job-scraper-setup -->
 
 ### Identity
 - **Name:** [YOUR_NAME]
@@ -163,8 +163,8 @@ The repo has two distinct layers of AI tooling that work differently:
 - **`.claude/skills/`** — Claude Code skills (Markdown). These are loaded by the `Skill` tool and give Claude instructions. They are not executed; they shape Claude's behavior. The `job-application-assistant` skill (7 reference files) and `job-scraper` skill live here.
 - **`job_scraper/`** — Python CLI package. Claude runs `python -m job_scraper` directly via Bash. The pipeline fetches from external APIs, deduplicates against SQLite (`state.db`), and writes new jobs to `job_scraper/last_run.json` which Claude reads with the Read tool.
 
-### Drafter-reviewer pattern (`/apply`)
-The `/apply` command (`.claude/commands/apply.md`) orchestrates a two-agent loop:
+### Drafter-reviewer pattern (`/job-scraper-apply`)
+The `/job-scraper-apply` command (`.claude/commands/job-scraper-apply.md`) orchestrates a two-agent loop:
 1. **Drafter** (main Claude session): evaluates fit → drafts CV + cover letter as LaTeX files
 2. **Reviewer** (spawned `Agent`): researches the company via WebSearch/WebFetch, reads all reference files, critiques the drafts
 3. **Drafter** revises both files in-place based on the reviewer's structured feedback
@@ -172,12 +172,12 @@ The `/apply` command (`.claude/commands/apply.md`) orchestrates a two-agent loop
 This pattern separates research/critique from authoring to reduce confirmation bias.
 
 ### Profile data flow
-`/setup-job-agent` populates data into multiple files simultaneously. All of these must stay in sync:
+`/job-scraper-setup` populates data into multiple files simultaneously. All of these must stay in sync:
 - `CLAUDE.md` (this file) — always loaded, candidate profile + workflow rules
 - `.claude/skills/job-application-assistant/01-candidate-profile.md` — detailed structured profile read by both drafter and reviewer
 - `.claude/skills/job-scraper/search-queries.md` — search queries used by `/scrape`
 
-The `cv/main_example.tex` file is the **LaTeX template seed**; `/apply` copies and tailors it into `cv/main_<company>.tex`.
+The `cv/main_example.tex` file is the **LaTeX template seed**; `/job-scraper-apply` copies and tailors it into `cv/main_<company>.tex`.
 
 ### Application state
 - `job_scraper/state.db` — SQLite deduplication store for the Python scraper

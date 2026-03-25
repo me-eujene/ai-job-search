@@ -1,6 +1,6 @@
-# /setup-job-agent - Profile Onboarding Interview
+# /job-scraper-setup - Profile Onboarding Interview
 
-You are running the onboarding setup for the AI Job Search framework. Your goal is to collect the user's professional information and populate all profile files so the `/apply` workflow works out of the box.
+You are running the onboarding setup for the AI Job Search framework. Your goal is to collect the user's professional information and populate all profile files so the `/job-scraper-apply` workflow works out of the box.
 
 ---
 
@@ -194,8 +194,8 @@ Present a summary:
 >
 > **Try it out:**
 > - The scraper just ran a test — if it found jobs, run `/scrape` to see the full evaluation
-> - Run `/apply` with a job posting URL to see the full application workflow
-> - Run `/setup-job-agent --section search` later to update your search queries as your priorities evolve
+> - Run `/job-scraper-apply` with a job posting URL to see the full application workflow
+> - Run `/job-scraper-setup --section search` later to update your search queries as your priorities evolve
 
 ---
 
@@ -204,6 +204,6 @@ Present a summary:
 - Each section is a natural conversation, not a form
 - The user can skip optional sections
 - Synthesize answers into structured formats (the user doesn't need to know markdown or LaTeX)
-- Can be re-run with `--section <name>` to update specific sections (e.g., `/setup-job-agent --section search` to reconfigure job search queries without re-doing the full profile)
+- Can be re-run with `--section <name>` to update specific sections (e.g., `/job-scraper-setup --section search` to reconfigure job search queries without re-doing the full profile)
 - Section 9 (search) proactively suggests role types the user may not have considered
-- At the end, suggest running `/scrape` and `/apply` with a test job posting
+- At the end, suggest running `/scrape` and `/job-scraper-apply` with a test job posting
