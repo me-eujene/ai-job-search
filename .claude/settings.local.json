@@ -12,7 +12,9 @@
       "Bash(netstat -ano)",
       "Bash(tasklist)",
       "Skill(commit-commands:commit)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(cd:*)",
+      "Bash(git:*)"
     ]
   }
 }

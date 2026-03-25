@@ -1,4 +1,4 @@
-# /setup - Profile Onboarding Interview
+# /setup-job-agent - Profile Onboarding Interview
 
 You are running the onboarding setup for the AI Job Search framework. Your goal is to collect the user's professional information and populate all profile files so the `/apply` workflow works out of the box.
 
@@ -203,6 +203,6 @@ Present a summary:
 - Each section is a natural conversation, not a form
 - The user can skip optional sections
 - Synthesize answers into structured formats (the user doesn't need to know markdown or LaTeX)
-- Can be re-run with `--section <name>` to update specific sections (e.g., `/setup --section search` to reconfigure job search queries without re-doing the full profile)
+- Can be re-run with `--section <name>` to update specific sections (e.g., `/setup-job-agent --section search` to reconfigure job search queries without re-doing the full profile)
 - Section 9 (search) proactively suggests role types the user may not have considered
 - At the end, suggest running `/scrape` and `/apply` with a test job posting

@@ -1,6 +1,6 @@
 # Interview Preparation Guide
 
-<!-- SETUP: STAR examples are personalized by running /setup based on your actual experience -->
+<!-- SETUP: STAR examples are personalized by running /setup-job-agent based on your actual experience -->
 
 ## STAR Format
 

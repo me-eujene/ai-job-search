@@ -4,8 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Job Application Assistant for [YOUR_NAME]
 
-<!-- SETUP: This file is populated by running /setup -->
-<!-- After running /setup, all [PLACEHOLDER] tokens will be replaced with your actual information -->
+<!-- SETUP: This file is populated by running /setup-job-agent-job-agent -->
+<!-- After running /setup-job-agent-job-agent, all [PLACEHOLDER] tokens will be replaced with your actual information -->
 
 ## Role
 This repo is a job application workspace. Claude acts as a career advisor and application assistant for [YOUR_NAME], helping with:
@@ -17,7 +17,7 @@ This repo is a job application workspace. Claude acts as a career advisor and ap
 
 ## Candidate Profile
 
-<!-- This section is auto-populated by /setup. You can also fill it in manually. IF THIS IS NOT FILLED - ABORT AND RUN /SETUP -->
+<!-- This section is auto-populated by /setup-job-agent. You can also fill it in manually. IF THIS IS NOT FILLED - ABORT AND RUN /SETUP-JOB-AGENT -->
 
 ### Identity
 - **Name:** [YOUR_NAME]
@@ -172,7 +172,7 @@ The `/apply` command (`.claude/commands/apply.md`) orchestrates a two-agent loop
 This pattern separates research/critique from authoring to reduce confirmation bias.
 
 ### Profile data flow
-`/setup` populates data into multiple files simultaneously. All of these must stay in sync:
+`/setup-job-agent-job-agent` populates data into multiple files simultaneously. All of these must stay in sync:
 - `CLAUDE.md` (this file) — always loaded, candidate profile + workflow rules
 - `.claude/skills/job-application-assistant/01-candidate-profile.md` — detailed structured profile read by both drafter and reviewer
 - `.claude/skills/job-scraper/search-queries.md` — search queries used by `/scrape`

@@ -71,7 +71,7 @@ claude
 Then run the onboarding:
 
 ```
-/setup
+/setup-job-agent
 ```
 
 Claude will offer two paths:
@@ -99,9 +99,9 @@ Both paths produce the same result: fully populated profile files.
 Update specific sections later without re-doing the full profile:
 
 ```
-/setup --section skills
-/setup --section experience
-/setup --section search
+/setup-job-agent-job-agent --section skills
+/setup-job-agent-job-agent --section experience
+/setup-job-agent-job-agent --section search
 ```
 
 The `--section search` option is especially useful as your priorities evolve.

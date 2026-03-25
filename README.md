@@ -11,7 +11,7 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (Indeed NL, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
 
 ```
-/setup          /scrape              /apply <url>
+/setup-job-agent          /scrape              /apply <url>
   |                |                     |
   v                v                     v
 Fill in        Run Python           Evaluate fit
@@ -63,7 +63,7 @@ The RapidAPI key powers Indeed NL and LinkedIn NL fetchers (free tier: 200 reque
 ```bash
 claude
 # Then inside Claude Code:
-/setup
+/setup-job-agent
 ```
 
 Claude will ask about your background, skills, and career goals, then populate all profile files automatically. You can import from an existing CV or answer questions interactively.
@@ -98,7 +98,7 @@ ai-job-search/
 ├── .claude/
 │   ├── commands/
 │   │   ├── apply.md                   # /apply workflow (drafter-reviewer)
-│   │   └── setup.md                   # /setup onboarding interview
+│   │   └── setup-job-agent.md          # /setup-job-agent-job-agent onboarding interview
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
 │   │   │   ├── SKILL.md               # Skill definition
@@ -111,7 +111,7 @@ ai-job-search/
 │   │   │   └── 07-interview-prep.md
 │   │   └── job-scraper/               # Job search orchestration skill
 │   │       ├── SKILL.md
-│   │       └── search-queries.md      # Populated by /setup
+│   │       └── search-queries.md      # Populated by /setup-job-agent
 │   └── settings.local.json            # Claude Code permissions
 ├── job_scraper/                       # Python job scraper (NL market)
 │   ├── src/
@@ -168,7 +168,7 @@ When you run `/scrape`, Claude starts the server if needed, triggers a run, quer
 
 ### Which files to edit manually
 
-If you prefer editing files directly instead of using `/setup`:
+If you prefer editing files directly instead of using `/setup-job-agent-job-agent`:
 
 | File | What to change |
 |------|---------------|
@@ -198,7 +198,7 @@ The CV uses [moderncv](https://ctan.org/pkg/moderncv) (banking style). The cover
 
 **Skills in context.** Instead of listing "Python", describe how you applied it: "Built ML pipelines for customer churn prediction using scikit-learn" gives sharper tailoring than "Python, machine learning."
 
-**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/setup`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
+**Career path discovery.** The framework supports two modes: explicit targeting (you know which roles you want) and latent opportunity discovery (the system surfaces paths you haven't considered, based on your full history). During `/setup-job-agent-job-agent`, invest time describing what energized you and what you'd want more of — this directly shapes fit evaluation.
 
 ## Acknowledgements
 

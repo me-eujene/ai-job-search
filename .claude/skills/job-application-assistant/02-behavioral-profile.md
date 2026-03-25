@@ -1,6 +1,6 @@
 # Behavioral Profile
 
-<!-- SETUP: This file is populated by running /setup -->
+<!-- SETUP: This file is populated by running /setup-job-agent -->
 <!-- You can use results from PI, DISC, Myers-Briggs, StrengthsFinder, or a self-assessment -->
 
 ## Overview
