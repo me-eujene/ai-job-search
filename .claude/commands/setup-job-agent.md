@@ -194,7 +194,7 @@ Present a summary:
 > **Try it out:**
 > - The scraper just ran a test — if it found jobs, run `/scrape` to see the full evaluation
 > - Run `/apply` with a job posting URL to see the full application workflow
-> - Run `/setup --section search` later to update your search queries as your priorities evolve
+> - Run `/setup-job-agent --section search` later to update your search queries as your priorities evolve
 
 ---
 

@@ -37,7 +37,7 @@ To run a single source: `python -m job_scraper --sources nvb`
 Wait for the command to complete (typically 10–30 seconds). It writes results to `job_scraper/last_run.json`.
 
 **If the command fails** (import error, missing `.env`, API key not set):
-- Check `job_scraper/.env` exists and contains `RAPIDAPI_KEY`
+- Check `job_scraper/.env` exists; if running Indeed/LinkedIn, ensure `RAPIDAPI_KEY` is set (NVB works without it)
 - Check dependencies are installed: `pip install -r job_scraper/requirements.txt`
 
 ### Step 2: Read results
@@ -172,7 +172,7 @@ The pipeline reads from `job_scraper/.env`. Key variables:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `RAPIDAPI_KEY` | API key for Indeed + LinkedIn (jobs-api14) | — required |
+| `RAPIDAPI_KEY` | API key for Indeed + LinkedIn (jobs-api14) | — required for Indeed/LinkedIn; NVB works without it |
 | `SEARCH_QUERIES` | Comma-separated queries for Indeed/LinkedIn | `product manager` |
 | `NVB_DCO_TITLE` | NVB taxonomy title filter | `Productmanager` |
 | `NVB_CITY` | City for NVB location radius | `Amsterdam` |
