@@ -1,23 +1,24 @@
 """
-Fetcher for LinkedIn NL via jobs-api14 on RapidAPI.
+Fetcher for LinkedIn NL via the public guest API (no authentication required).
 
-Endpoint: https://jobs-api14.p.rapidapi.com/v2/linkedin/search
+Endpoint: https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search
 
-Notes from live tests (2026-03-23):
-- Returns up to ~20 jobs per call
-- employmentTypes=fulltime works; experienceLevels=senior returns 0 results (don't use)
-- Remote filter: workplaceTypes=remote
-- No reliable datePosted filter — filter client-side by datePublishedTimestamp
+Returns HTML fragments — parsed with BeautifulSoup4 (lxml backend).
 
-Budget: 3 queries × 1 call each = 3 calls/run (same key as Indeed; combined budget is
-        6 calls/run × 22 weekdays = 132 calls/month — within the 200/month free tier).
+Notes:
+- No API key or login needed. LinkedIn intentionally exposes job listings publicly
+  so search engines can index them.
+- f_TPR timespan codes: r86400=24h, r604800=7d, r1209600=14d, r2592000=30d
+- Pagination via start= param (25 jobs per page); empty page signals end of results
+- Sleep 1s between pages to be polite and avoid rate limiting
+- build_client() sets Accept: application/json globally; we override it per-request
+  because the guest API returns HTML, not JSON
 """
+import asyncio
 import logging
-import os
-from datetime import datetime, timezone
 from typing import Optional
 
-import httpx
+from bs4 import BeautifulSoup
 
 from ..helpers import (
     build_client, iso_date, iso_ts, utc_now, parse_iso, is_within_days,
@@ -27,159 +28,173 @@ from ..types import Job, make_canonical_key
 
 logger = logging.getLogger(__name__)
 
-BASE_URL      = "https://jobs-api14.p.rapidapi.com"
-SEARCH_PATH   = "/v2/linkedin/search"
-RAPIDAPI_HOST = "jobs-api14.p.rapidapi.com"
+BASE_URL    = "https://www.linkedin.com"
+SEARCH_PATH = "/jobs-guest/jobs/api/seeMoreJobPostings/search"
 
-DEFAULT_QUERIES = [
-    "product manager",
-]
+DEFAULT_QUERIES  = ["product manager"]
+LOCATION         = "Amsterdam, Netherlands"
+LOOKBACK_DAYS    = 14
+PAGE_SIZE        = 25
+MAX_PAGES        = 5           # ceiling: 5 × 25 = 125 jobs per query
+INTER_PAGE_SLEEP = 2.0         # seconds between page fetches (1s hit 429 at page 5)
 
-LOCATION      = "Amsterdam, Netherlands"
-LOOKBACK_DAYS = 14
+# f_TPR values by day bucket. We pick the smallest bucket >= lookback_days.
+_TPR_BUCKETS = [(7, "r604800"), (14, "r1209600"), (30, "r2592000")]
+
+# Per-request Accept override (guest API returns HTML, not JSON)
+_HTML_HEADERS = {"Accept": "text/html, application/xhtml+xml, */*;q=0.9"}
 
 
 async def fetch_linkedin(
     queries: list[str] | None = None,
-    api_key: str | None = None,
     lookback_days: int = LOOKBACK_DAYS,
     title_keywords: list[str] | None = None,
 ) -> list[Job]:
-    """
-    Fetch LinkedIn NL jobs via RapidAPI.
-    api_key defaults to RAPIDAPI_KEY environment variable.
-    """
-    api_key        = api_key or os.environ.get("RAPIDAPI_KEY", "")
+    """Fetch LinkedIn NL jobs via the public guest API. No API key needed."""
+    queries        = queries or DEFAULT_QUERIES
     title_keywords = title_keywords or load_title_keywords()
-    if not api_key:
-        logger.error("RAPIDAPI_KEY not set; skipping LinkedIn fetch")
-        return []
-
-    queries = queries or DEFAULT_QUERIES
-    fetched_at = iso_ts(utc_now())
+    fetched_at     = iso_ts(utc_now())
     jobs: list[Job] = []
     seen_keys: set[str] = set()
 
-    headers = {
-        "x-rapidapi-host": RAPIDAPI_HOST,
-        "x-rapidapi-key": api_key,
-    }
+    # Pick the nearest f_TPR bucket covering lookback_days
+    tpr = "r2592000"  # default: 30d
+    for days, code in _TPR_BUCKETS:
+        if lookback_days <= days:
+            tpr = code
+            break
 
     async with build_client() as client:
         for query in queries:
             logger.info("LinkedIn: searching '%s'", query)
-            try:
-                raw_jobs = await _search(client, headers, query)
-            except httpx.HTTPStatusError as e:
-                if e.response.status_code == 429:
-                    logger.warning("LinkedIn: rate limited (429) on query '%s'", query)
-                else:
-                    logger.error("LinkedIn HTTP error for '%s': %s", query, e)
-                continue
-            except Exception as e:
-                logger.error("LinkedIn error for '%s': %s", query, e)
-                continue
+            start     = 0
+            date_stop = False
 
-            skipped_title = 0
-            for raw in raw_jobs:
-                # Date filter
-                ts_ms = raw.get("datePublishedTimestamp")
-                if ts_ms:
-                    dt = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
-                    if not is_within_days(iso_ts(dt), lookback_days):
+            for page_num in range(MAX_PAGES):
+                if date_stop:
+                    break
+
+                params = {
+                    "keywords": query,
+                    "location": LOCATION,
+                    "f_TPR":    tpr,
+                    "start":    start,
+                }
+
+                try:
+                    resp = await client.get(
+                        BASE_URL + SEARCH_PATH,
+                        params=params,
+                        headers=_HTML_HEADERS,
+                    )
+                    resp.raise_for_status()
+                except Exception as e:
+                    logger.error(
+                        "LinkedIn page %d error for '%s': %s", page_num, query, e
+                    )
+                    break
+
+                cards = _parse_cards(resp.text)
+                if not cards:
+                    logger.info(
+                        "LinkedIn '%s': empty page at start=%d — done", query, start
+                    )
+                    break
+
+                skipped_title = 0
+                for raw in cards:
+                    # Date gate — listings are newest-first, so we can early-exit
+                    date_str = raw.get("date", "")
+                    if date_str and not is_within_days(date_str, lookback_days):
+                        date_stop = True
+                        break
+
+                    if not title_matches(raw.get("title", ""), "", title_keywords):
+                        skipped_title += 1
                         continue
-                elif raw.get("datePosted"):
-                    if not is_within_days(raw["datePosted"], lookback_days):
+
+                    job = _normalise(raw, fetched_at)
+                    if job is None:
                         continue
+                    if job.canonical_key in seen_keys:
+                        continue
+                    seen_keys.add(job.canonical_key)
+                    jobs.append(job)
 
-                # Title relevance gate
-                raw_title = raw.get("title") or raw.get("jobTitle") or ""
-                if not title_matches(raw_title, "", title_keywords):
-                    skipped_title += 1
-                    continue
+                if skipped_title:
+                    logger.info(
+                        "LinkedIn '%s' start=%d: skipped %d off-topic titles",
+                        query, start, skipped_title,
+                    )
 
-                job = _normalise(raw, fetched_at)
-                if job is None:
-                    continue
-
-                if job.canonical_key in seen_keys:
-                    continue
-                seen_keys.add(job.canonical_key)
-                jobs.append(job)
-
-            if skipped_title:
-                logger.info("LinkedIn '%s': skipped %d off-topic titles", query, skipped_title)
+                start += PAGE_SIZE
+                if page_num < MAX_PAGES - 1 and not date_stop:
+                    await asyncio.sleep(INTER_PAGE_SLEEP)
 
     logger.info("LinkedIn: collected %d jobs", len(jobs))
     return jobs
 
 
-async def _search(
-    client: httpx.AsyncClient, headers: dict, query: str
-) -> list[dict]:
-    params = {
-        "query":           query,
-        "location":        LOCATION,
-        "employmentTypes": "fulltime",
-    }
-    resp = await client.get(
-        BASE_URL + SEARCH_PATH,
-        params=params,
-        headers=headers,
-    )
-    resp.raise_for_status()
-    data = resp.json()
+def _parse_cards(html: str) -> list[dict]:
+    """Parse job cards from a LinkedIn guest API HTML fragment."""
+    soup  = BeautifulSoup(html, "lxml")
+    cards = []
 
-    # Documented schema: { "jobs": [...] }
-    for key in ("jobs", "data"):
-        if key in data:
-            return data[key]
-    logger.warning("LinkedIn: unexpected response shape — top-level keys: %s", list(data.keys()))
-    return []
+    for card in soup.find_all("div", class_="base-card"):
+        # Job ID from data-entity-urn="urn:li:jobPosting:1234567890"
+        urn    = card.get("data-entity-urn", "")
+        job_id = urn.split(":")[-1] if urn else ""
+
+        title_tag = card.find("h3", class_="base-search-card__title")
+        title     = title_tag.get_text(strip=True) if title_tag else ""
+
+        subtitle  = card.find("h4", class_="base-search-card__subtitle")
+        company_a = subtitle.find("a") if subtitle else None
+        company   = company_a.get_text(strip=True) if company_a else ""
+
+        loc_tag  = card.find("span", class_="job-search-card__location")
+        location = loc_tag.get_text(strip=True) if loc_tag else ""
+
+        time_tag = card.find("time")
+        date_str = time_tag.get("datetime", "") if time_tag else ""
+
+        cards.append({
+            "id":       job_id,
+            "title":    title,
+            "company":  company,
+            "location": location,
+            "date":     date_str,
+        })
+
+    return cards
 
 
 def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
-    """Convert a raw jobs-api14 LinkedIn result to a Job."""
-    job_id = raw.get("id") or raw.get("jobId") or ""
-    title  = raw.get("title") or raw.get("jobTitle") or ""
+    title   = raw.get("title", "")
+    company = raw.get("company", "")
     if not title:
         return None
 
-    company = raw.get("companyName") or raw.get("company") or raw.get("organization") or ""
-    if isinstance(company, dict):
-        company = company.get("name") or ""
+    # LinkedIn location strings: "Amsterdam, North Holland, Netherlands" → city only
+    loc_full = raw.get("location", "")
+    city     = loc_full.split(",")[0].strip() if loc_full else ""
 
-    loc_obj = raw.get("location") or {}
-    if isinstance(loc_obj, dict):
-        city = loc_obj.get("city") or loc_obj.get("display") or ""
-    else:
-        city = str(loc_obj)
+    job_id      = raw.get("id", "")
+    date_str    = raw.get("date", "")
+    dt          = parse_iso(date_str)
+    date_posted = iso_date(dt) if dt else date_str
 
-    # Date
-    ts_ms = raw.get("datePublishedTimestamp")
-    if ts_ms:
-        dt = datetime.fromtimestamp(ts_ms / 1000, tz=timezone.utc)
-        date_posted = iso_date(dt)
-    else:
-        date_raw = raw.get("datePosted") or ""
-        dt2 = parse_iso(date_raw)
-        date_posted = iso_date(dt2) if dt2 else ""
-
-    apply_url = raw.get("linkedinUrl") or raw.get("detailsPageUrl") or raw.get("url") or ""
-
-    description = raw.get("description") or raw.get("snippet") or None
-
-    canonical_key = make_canonical_key(title, company, city)
+    apply_url = f"{BASE_URL}/jobs/view/{job_id}/" if job_id else ""
 
     return Job(
-        id=str(job_id) if job_id else canonical_key[:16],
-        source="linkedin",
-        title=title,
-        company=company,
-        location=city,
-        date_posted=date_posted,
-        fetched_at=fetched_at,
-        description=description,
-        apply_url=apply_url,
-        canonical_key=canonical_key,
+        id            = job_id or make_canonical_key(title, company, city)[:16],
+        source        = "linkedin",
+        title         = title,
+        company       = company,
+        location      = city,
+        date_posted   = date_posted,
+        fetched_at    = fetched_at,
+        description   = None,  # search results don't include full descriptions
+        apply_url     = apply_url,
+        canonical_key = make_canonical_key(title, company, city),
     )

@@ -16,8 +16,8 @@ from .types import Job
 
 logger = logging.getLogger(__name__)
 
-Source = Literal["indeed", "linkedin", "nvb"]
-ALL_SOURCES: list[Source] = ["indeed", "linkedin", "nvb"]
+Source = Literal["linkedin", "nvb"]
+ALL_SOURCES: list[Source] = ["linkedin", "nvb"]
 
 
 def _get_queries() -> list[str]:
@@ -34,10 +34,6 @@ async def _fetch_source(source: Source, queries: list[str]) -> tuple[list[Job], 
     Never raises — errors are returned as a string.
     """
     try:
-        if source == "indeed":
-            from .fetchers.indeed import fetch_indeed
-            return await fetch_indeed(queries or None), None
-
         if source == "linkedin":
             from .fetchers.linkedin import fetch_linkedin
             return await fetch_linkedin(queries or None), None
