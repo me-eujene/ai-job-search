@@ -10,3 +10,8 @@ lxml>=5.0
 
 # Environment variables
 python-dotenv>=1.0.1
+
+# hiring.cafe — Cloudflare bypass (launches a stealth Chromium browser to get cf_clearance)
+# Also run: playwright install chromium
+cf-clearance>=0.31.0
+playwright>=1.58.0

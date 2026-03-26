@@ -16,8 +16,8 @@ from .types import Job
 
 logger = logging.getLogger(__name__)
 
-Source = Literal["linkedin", "nvb"]
-ALL_SOURCES: list[Source] = ["linkedin", "nvb"]
+Source = Literal["linkedin", "nvb", "hiringcafe"]
+ALL_SOURCES: list[Source] = ["linkedin", "nvb", "hiringcafe"]
 
 
 def _get_queries() -> list[str]:
@@ -41,6 +41,10 @@ async def _fetch_source(source: Source, queries: list[str]) -> tuple[list[Job], 
         if source == "nvb":
             from .fetchers.nvb import fetch_nvb
             return await fetch_nvb(), None
+
+        if source == "hiringcafe":
+            from .fetchers.hiringcafe import fetch_hiringcafe
+            return await fetch_hiringcafe(queries or None), None
 
     except Exception as e:
         return [], f"{source} fetch failed: {e}"
