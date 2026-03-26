@@ -8,7 +8,7 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 
 ## What this is
 
-A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (Indeed NL, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (hiring.cafe, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
 
 ```
 /job-scraper-setup          /job-scraper-run              /job-scraper-apply <url>
@@ -47,16 +47,17 @@ cd ai-job-search
 
 ```bash
 pip install -r job_scraper/requirements.txt
+playwright install chromium   # one-time: needed for hiring.cafe Cloudflare bypass
 ```
 
 ### 3. Configure the scraper
 
 ```bash
 cp job_scraper/.env.example job_scraper/.env
-# Edit .env: add your RAPIDAPI_KEY and adjust search queries / location
+# Edit .env: adjust search queries, NVB location, and title keywords
 ```
 
-The RapidAPI key powers Indeed NL and LinkedIn NL fetchers (free tier: 200 requests/month). NVB (Nationale Vacaturebank) requires no key.
+No API keys required — all three sources use public endpoints.
 
 ### 4. Set up your profile
 
@@ -120,8 +121,8 @@ ai-job-search/
 │   │   ├── types.py                   # Job dataclass + canonical key
 │   │   ├── helpers.py                 # HTTP client, date utils, title filter
 │   │   └── fetchers/
-│   │       ├── indeed.py              # Indeed NL via RapidAPI (jobs-api14)
-│   │       ├── linkedin.py            # LinkedIn NL via RapidAPI (jobs-api14)
+│   │       ├── hiringcafe.py          # hiring.cafe (Cloudflare bypass via Playwright)
+│   │       ├── linkedin.py            # LinkedIn NL guest API (no auth)
 │   │       └── nvb.py                 # Nationale Vacaturebank (public API)
 │   ├── .env.example                   # Configuration template
 │   └── requirements.txt
@@ -159,13 +160,13 @@ All claims in the CV and cover letter are verified against your actual profile. 
 
 ## How the job scraper works
 
-The `job_scraper/` pipeline is a Python service with three fetchers:
+The `job_scraper/` pipeline is a Python CLI with three fetchers:
 
 | Source | Approach | Auth |
 |--------|----------|------|
+| **hiring.cafe** | Search API (`/api/search-jobs`) — Cloudflare bypass via `cf-clearance` (Playwright stealth browser, runs once per scrape) | None |
+| **LinkedIn NL** | Public guest API (`/jobs-guest/` endpoint) — HTML fragments parsed with BeautifulSoup | None |
 | **NVB** (Nationale Vacaturebank) | Public REST API with `dcoTitle` + location filters | None |
-| **Indeed NL** | RapidAPI (jobs-api14) | `RAPIDAPI_KEY` |
-| **LinkedIn NL** | RapidAPI (jobs-api14) | `RAPIDAPI_KEY` |
 
 All sources feed into a shared deduplication store (SQLite). Claude runs `python -m job_scraper` directly — no server process needed. Results are written to `job_scraper/last_run.json` and read back by Claude via the Read tool.
 
@@ -188,7 +189,7 @@ If you prefer editing files directly instead of using `/job-scraper-setup`:
 ### Configuring the scraper
 
 Edit `job_scraper/.env` to adjust:
-- `SEARCH_QUERIES` — comma-separated queries sent to Indeed and LinkedIn
+- `SEARCH_QUERIES` — comma-separated queries sent to LinkedIn and hiring.cafe
 - `NVB_DCO_TITLE` — NVB's taxonomy title (e.g. `Productmanager`, `Data Scientist`)
 - `NVB_CITY` / `NVB_DISTANCE_KM` — location filter
 - `TITLE_KEYWORDS` — client-side relevance filter applied to all sources
