@@ -8,10 +8,11 @@ allowed-tools: "Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUs
 
 ## How It Works
 
-The `job_scraper/` Python pipeline fetches jobs from three Dutch sources:
-- **NVB** (Nationale Vacaturebank) — public API, no auth required, city-radius filters
-- **Indeed NL** — via RapidAPI (jobs-api14); requires `RAPIDAPI_KEY` in `job_scraper/.env`
-- **LinkedIn NL** — via RapidAPI (jobs-api14); same key as Indeed
+The `job_scraper/` Python pipeline fetches jobs from four Dutch sources:
+- **LinkedIn NL** — public guest API, no auth required
+- **NVB** (Nationale Vacaturebank) — public REST API, no auth required, city-radius filters
+- **Hiring.cafe** — Cloudflare-protected; uses cf-clearance + Playwright for initial cookie
+- **Adzuna NL** — official REST API; requires `ADZUNA_APP_ID` + `ADZUNA_APP_KEY` (free tier at developer.adzuna.com)
 
 State is stored in a SQLite database (`job_scraper/state.db`). The pipeline runs on demand — Claude triggers it directly with a Bash command from the repo root. No server process is needed.
 
@@ -176,11 +177,13 @@ The pipeline reads from `job_scraper/.env`. Key variables:
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `RAPIDAPI_KEY` | API key for Indeed + LinkedIn (jobs-api14) | — required for Indeed/LinkedIn; NVB works without it |
-| `SEARCH_QUERIES` | Comma-separated queries for Indeed/LinkedIn | `product manager` |
+| `SEARCH_QUERIES` | Comma-separated queries for LinkedIn + Adzuna | `product manager` |
 | `NVB_DCO_TITLE` | NVB taxonomy title filter | `Productmanager` |
 | `NVB_CITY` | City for NVB location radius | `Amsterdam` |
-| `NVB_DISTANCE_KM` | Search radius in km | `40` |
+| `NVB_DISTANCE_KM` | Search radius in km (NVB) | `40` |
+| `ADZUNA_APP_ID` | Adzuna API app ID — source skipped if absent | — register at developer.adzuna.com |
+| `ADZUNA_APP_KEY` | Adzuna API app key — source skipped if absent | — register at developer.adzuna.com |
+| `ADZUNA_DISTANCE_KM` | Search radius in km (Adzuna) | `40` |
 | `TITLE_KEYWORDS` | Client-side title filter (all sources) | product manager variants |
 | `DB_PATH` | SQLite database path | `job_scraper/state.db` |
 
