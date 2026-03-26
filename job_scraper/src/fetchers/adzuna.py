@@ -9,7 +9,8 @@ KEY FINDINGS:
   - Page number is in the URL path (/search/1, /search/2, ...), not a query param.
   - max_days_old=14 filters server-side — no need to break on stale dates.
   - sort_by=date returns newest-first.
-  - distance param is in km (same convention as NVB_DISTANCE_KM).
+  - No where/distance filter — the /jobs/nl/ endpoint scopes to NL already.
+    Country-level postings (e.g. "Nederland") are included intentionally.
   - results_per_page max is 50.
   - Response: {"results": [...], "count": N}
   - Each job: id, title, company.display_name, location.display_name,
@@ -30,9 +31,7 @@ logger = logging.getLogger(__name__)
 BASE_URL    = "https://api.adzuna.com/v1/api/jobs/nl/search"
 
 DEFAULT_QUERY       = "product manager"
-DEFAULT_LOCATION    = "Amsterdam"
-DEFAULT_DISTANCE_KM = 40
-LOOKBACK_DAYS       = 14
+LOOKBACK_DAYS       = 28
 RESULTS_PER_PAGE    = 50
 MAX_PAGES           = 4   # 4 × 50 = 200 ceiling; max_days_old=14 already limits volume
 
@@ -59,7 +58,6 @@ async def fetch_adzuna(
 
     queries        = queries or [DEFAULT_QUERY]
     title_keywords = title_keywords or load_title_keywords()
-    distance_km    = int(os.environ.get("ADZUNA_DISTANCE_KM", DEFAULT_DISTANCE_KM))
     fetched_at     = iso_ts(utc_now())
     jobs: list[Job] = []
     seen_keys: set[str] = set()
@@ -73,13 +71,11 @@ async def fetch_adzuna(
                     resp = await client.get(
                         f"{BASE_URL}/{page}",
                         params={
-                            "app_id":          app_id,
-                            "app_key":         app_key,
-                            "what":            query,
-                            "where":           DEFAULT_LOCATION,
-                            "distance":        distance_km,
-                            "max_days_old":    lookback_days,
-                            "sort_by":         "date",
+                            "app_id":           app_id,
+                            "app_key":          app_key,
+                            "what":             query,
+                            "max_days_old":     lookback_days,
+                            "sort_by":          "date",
                             "results_per_page": RESULTS_PER_PAGE,
                         },
                     )

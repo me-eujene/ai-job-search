@@ -46,12 +46,25 @@ Wait for the command to complete (typically 10–30 seconds). It writes results 
 Read `job_scraper/last_run.json`. The file contains:
 - `run_id`, `started_at`, `finished_at` — run metadata
 - `total_fetched`, `new_jobs`, `skipped` — counts
-- `sources` — per-source counts (e.g. `{"indeed": 3, "nvb": 2}`)
+- `sources` — per-source counts (e.g. `{"linkedin": 3, "nvb": 2}`)
 - `errors` — any fetch errors (empty list = clean run)
 - `jobs` — array of new job objects: `title`, `company`, `location`, `source`, `apply_url`, `date_posted`, `description`
 
 **If `new_jobs` is 0**: Report that no new jobs were found and stop.
 **If `errors` is non-empty**: Report errors alongside any results found.
+
+**Querying state.db directly:** Use the `sqlite3` CLI — never write Python one-liners for this:
+```bash
+sqlite3 -header -column job_scraper/state.db "SELECT title, company, location, date_posted FROM seen_jobs WHERE ..."
+```
+Common queries:
+```bash
+# All jobs from last 7 days
+sqlite3 -header -column job_scraper/state.db "SELECT title, company, location, date_posted FROM seen_jobs WHERE first_seen >= datetime('now', '-7 days') ORDER BY date_posted DESC"
+
+# Count by source
+sqlite3 -header -column job_scraper/state.db "SELECT source, COUNT(*) as n FROM seen_jobs GROUP BY source"
+```
 
 ### Step 3: Quick Fit Assessment
 
@@ -183,7 +196,6 @@ The pipeline reads from `job_scraper/.env`. Key variables:
 | `NVB_DISTANCE_KM` | Search radius in km (NVB) | `40` |
 | `ADZUNA_APP_ID` | Adzuna API app ID — source skipped if absent | — register at developer.adzuna.com |
 | `ADZUNA_APP_KEY` | Adzuna API app key — source skipped if absent | — register at developer.adzuna.com |
-| `ADZUNA_DISTANCE_KM` | Search radius in km (Adzuna) | `40` |
 | `TITLE_KEYWORDS` | Client-side title filter (all sources) | product manager variants |
 | `DB_PATH` | SQLite database path | `job_scraper/state.db` |
 
