@@ -40,7 +40,7 @@ async def main() -> None:
     # Fetch jobs inserted during this run only (skip if nothing new this run).
     # Strip internal fields the agent doesn't need: canonical_key, first_seen,
     # fetched_at, and description (too large; retrieved on demand per job).
-    _INTERNAL = {"canonical_key", "first_seen", "fetched_at", "description"}
+    _INTERNAL = {"first_seen", "fetched_at", "description"}
     if summary["new_jobs"] > 0:
         today = iso_date(utc_now())
         raw_jobs = get_jobs(since=today)
