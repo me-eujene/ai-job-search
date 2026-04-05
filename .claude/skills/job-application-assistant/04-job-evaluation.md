@@ -2,8 +2,20 @@
 
 <!-- SETUP: Skill match areas and career goals are personalized by running /job-scraper-setup -->
 
+
+## Extract keywords from the JD
+- Create a list of skills/keywords from the must-have section (required skills, non-negotiables, you will bring, etc)
+- Create a list of nice-to-haves (bonus if you have, etc)
+
 ## Scoring Dimensions
 
+Evaluate each job posting against these dimensions:
+
+### 0. Keyword match:
+- Keyword match percentage for must-have skills
+- Keyword match percentage for nice-to-haves
+
+Take into account that 100% match is liklely impossible, so surface the transferrable skill keywords, adjacent-domain experiences etc.
 Evaluate each job posting against these five dimensions:
 
 ### 1. Technical Skills Match (0-100)

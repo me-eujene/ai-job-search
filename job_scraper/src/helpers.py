@@ -8,6 +8,8 @@ import httpx
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 
+from markdownify import markdownify as _markdownify
+
 
 # ---------------------------------------------------------------------------
 # HTTP
@@ -55,6 +57,13 @@ def strip_html(html: Optional[str]) -> Optional[str]:
     text = _TAG_RE.sub(" ", html)
     text = _html.unescape(text)
     return _WHITESPACE_RE.sub(" ", text).strip()
+
+
+def html_to_md(html: Optional[str]) -> Optional[str]:
+    """Convert HTML to Markdown."""
+    if not html:
+        return html
+    return _markdownify(html, heading_style="ATX", strip=["script", "style"]).strip() or None
 
 
 # ---------------------------------------------------------------------------

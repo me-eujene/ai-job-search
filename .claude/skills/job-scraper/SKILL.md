@@ -78,6 +78,11 @@ Read the candidate profile files. For each job in `jobs`, do a rapid fit check:
 
 Read `job_search_tracker.csv` and skip any jobs whose company+title already appears there (already applied or evaluated).
 
+**Tracker write rules** (apply throughout the workflow):
+- **Add to tracker only if a fit rating was assigned** (High / Medium / Low with a numeric score). Jobs dismissed without assessment do not get a row — `state.db` handles deduplication for those.
+- Blocklisted jobs: do not add to tracker.
+- Applied jobs: always add regardless of fit score.
+
 ### Step 4b: Apply blocklist
 
 Read the deal-breakers list from `CLAUDE.md`. Silently drop any job whose company name matches a blocklisted company. Do not include dropped jobs in counts or mention them.
@@ -116,7 +121,8 @@ If the user picks a number, proceed with the **Application Workflow** below.
 When the user provides a job posting (URL or text), or selects a job from scrape results, follow this workflow.
 
 ### Step 1: Research & Evaluate Fit
-- Fetch the job posting content (use WebFetch for URLs)
+- Fetch the job posting content (use WebFetch for URLs, use Chrome for Cloudflare-protected sites)
+- Save the role description to `JDs/YYYYMMDD_company_role.md`
 - Analyze the posting for required competencies, keywords, and priorities
 - Research the company (website, LinkedIn, mission, recent news)
 - Score the posting against the candidate's profile using the framework in `04-job-evaluation.md`
@@ -130,17 +136,15 @@ When the user provides a job posting (URL or text), or selects a job from scrape
 
 _Only proceed if the user confirmed they want to apply._
 
-- Read the candidate's existing CVs from `cv/docs/` (`.docx` or `.pdf` files) as baseline content — these are the source of truth for experience, dates, and phrasing
+- Read the candidate's existing CVs from `cv/` (`.docx` or `.pdf` files) as baseline content — these are the source of truth for experience, dates, and phrasing
 - List existing LaTeX variants in `cv/` and pick the most recently modified tailored file as the structural starting point, or `cv/main_example.tex` if none exist
 - Follow the guidelines in `05-cv-templates.md`
-- Create `cv/main_<company>.tex` with tailored content
-- Adjust: profile statement, skills section, experience bullet emphasis, section order
 
 ### Step 3: Write Cover Letter
 - Follow the writing style rules in `03-writing-style.md` (critical: no em-dashes, no cliches)
 - Follow the template structure in `06-cover-letter-templates.md`
 - Create `cover_letters/cover_<company>_<role>.tex`
-- Ensure the letter connects specific experience to the role requirements
+- Ensure the letter connects specific experience to the role requirements. Identify the top 3-5 keywords/requirements from the job description and make sure each is present or addressed.
 
 ### Step 4: Update Tracker
 

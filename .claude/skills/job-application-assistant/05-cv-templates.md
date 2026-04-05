@@ -2,6 +2,15 @@
 
 <!-- SETUP: Profile statements and section ordering are personalized by running /job-scraper-setup -->
 
+## Choose one of two approaches:
+
+### PATH A FOR MINOR CHANGES
+Use one of the existing .pdf or .doc files provided by user (ask if none avaialble) to use as a source format.
+User may decide to make changes themselves, if so - generate a list of high- and medium- priority changes per resume section. Explain your motivation behind each change and why do you think this reframe is about form, not substance.
+
+### PATH B FOR MAJOR CHANGES OR WHEN NO CV
+If no CV provided: use LaTeX sources and formats.
+
 ## Template: LaTeX moderncv (Banking Style)
 
 All CVs use the moderncv LaTeX package with the "banking" style and "blue" color scheme.

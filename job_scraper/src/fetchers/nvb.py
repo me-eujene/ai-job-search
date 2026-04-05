@@ -24,7 +24,7 @@ import httpx
 
 from ..helpers import (
     build_client, iso_date, iso_ts, utc_now, parse_iso, is_within_days,
-    load_title_keywords, title_matches,
+    load_title_keywords, title_matches, html_to_md,
 )
 from ..types import Job, make_canonical_key
 
@@ -253,7 +253,7 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
         location      = location,
         date_posted   = date_posted,
         fetched_at    = fetched_at,
-        description   = raw.get("description") or None,
+        description   = html_to_md(raw.get("description")) or None,
         apply_url     = apply_url,
         canonical_key = make_canonical_key(title, company, city),
     )
