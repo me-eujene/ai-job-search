@@ -59,11 +59,14 @@ def strip_html(html: Optional[str]) -> Optional[str]:
     return _WHITESPACE_RE.sub(" ", text).strip()
 
 
-def html_to_md(html: Optional[str]) -> Optional[str]:
-    """Convert HTML to Markdown."""
+def html_to_md(html: Optional[str], min_chars: int = 150) -> Optional[str]:
+    """Convert HTML to Markdown. Returns None if result is below min_chars (e.g. empty ATS shells)."""
     if not html:
         return html
-    return _markdownify(html, heading_style="ATX", strip=["script", "style"]).strip() or None
+    result = _markdownify(html, heading_style="ATX", strip=["script", "style"]).strip() or None
+    if result and len(result) < min_chars:
+        return None
+    return result
 
 
 # ---------------------------------------------------------------------------

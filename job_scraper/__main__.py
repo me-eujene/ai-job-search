@@ -37,11 +37,16 @@ async def main() -> None:
 
     summary = await run_pipeline(sources=args.sources)
 
-    # Fetch jobs inserted during this run (filter by today's date — safe for a
-    # single daily run; if two runs happen on the same day both are included,
-    # which is acceptable for a personal tool).
-    today = iso_date(utc_now())
-    jobs = get_jobs(since=today)
+    # Fetch jobs inserted during this run only (skip if nothing new this run).
+    # Strip internal fields the agent doesn't need: canonical_key, first_seen,
+    # fetched_at, and description (too large; retrieved on demand per job).
+    _INTERNAL = {"canonical_key", "first_seen", "fetched_at", "description"}
+    if summary["new_jobs"] > 0:
+        today = iso_date(utc_now())
+        raw_jobs = get_jobs(since=today)
+        jobs = [{k: v for k, v in j.items() if k not in _INTERNAL} for j in raw_jobs]
+    else:
+        jobs = []
 
     result = {**summary, "jobs": jobs}
     OUTPUT_FILE.write_text(
