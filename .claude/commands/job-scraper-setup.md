@@ -128,14 +128,21 @@ This proactive suggestion step helps users discover career paths they might not 
 
 Once all information is collected (via either path), generate the following files:
 
-### 1. Update `CLAUDE.md`
-Replace all `[PLACEHOLDER]` tokens with the user's actual information. Keep the structure, workflow, and verification checklist intact.
+### 1. Write `01-candidate-profile.md`
+Populate `.claude/skills/job-application-assistant/01-candidate-profile.md` with all collected data. Sections to fill:
+- Identity & Contact (name, location, phone, email, LinkedIn, GitHub, languages, status, constraints)
+- Education table
+- Professional Experience (one subsection per role)
+- Independent Projects
+- Technical Skills (programming, domain, tools)
+- Certifications, Publications, Awards, References
+- Behavioral Summary (profile type, strengths, growth areas, ideal environment, passions)
+- Career Goals & Target Sectors (target roles, target sectors, deal-breakers)
 
-### 2. Populate `01-candidate-profile.md`
-Write the full candidate profile with structured sections: Identity, Education, Professional Experience, Independent Projects, Technical Skills, Publications, Awards, References.
+Do NOT modify `CLAUDE.md` — it now references this file instead of storing profile data directly.
 
-### 3. Populate `02-behavioral-profile.md`
-Write the behavioral profile based on assessment results or synthesized answers.
+### 2. Populate `02-behavioral-profile.md`
+Write the full behavioral profile based on assessment results or synthesized answers. This includes drives table, strongest behaviors, work preferences, growth areas, keyword mapping, and management style preferences.
 
 ### 4. Update `04-job-evaluation.md`
 Replace skill match areas with the user's actual skills:
@@ -183,9 +190,8 @@ Present a summary:
 
 > **Setup complete!** Here's what was generated:
 >
-> - `CLAUDE.md` - Your full candidate profile
-> - `.claude/skills/job-application-assistant/01-candidate-profile.md` - Structured profile
-> - `.claude/skills/job-application-assistant/02-behavioral-profile.md` - Behavioral assessment
+> - `.claude/skills/job-application-assistant/01-candidate-profile.md` - Your complete candidate profile (single source of truth: identity, experience, behavioral summary, career goals)
+> - `.claude/skills/job-application-assistant/02-behavioral-profile.md` - Full behavioral assessment detail
 > - `.claude/skills/job-application-assistant/04-job-evaluation.md` - Personalized evaluation framework
 > - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
 > - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience

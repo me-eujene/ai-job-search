@@ -58,3 +58,31 @@
 - [NAME], [TITLE], [COMPANY] ([EMAIL], [PHONE])
 
 More references available upon request.
+
+---
+
+## Behavioral Summary
+
+<!-- Full behavioral detail is in 02-behavioral-profile.md. This is the quick-reference summary for fit assessment. -->
+
+- **Profile type:** [PROFILE_TYPE]
+- **Strengths:** [YOUR_STRENGTHS]
+- **Growth areas:** [YOUR_GROWTH_AREAS]
+- **Thrives in:** [YOUR_IDEAL_ENVIRONMENT]
+- **What excites you:** [PASSION_1], [PASSION_2]
+
+---
+
+## Career Goals & Target Sectors
+
+### Target roles
+- [YOUR_CAREER_GOAL_1]
+- [YOUR_CAREER_GOAL_2]
+
+### Target sectors
+- [SECTOR_1]: [EXAMPLE_COMPANIES]
+- [SECTOR_2]: [EXAMPLE_COMPANIES]
+
+### Deal-breakers
+- [DEALBREAKER_1]
+- [DEALBREAKER_2]
