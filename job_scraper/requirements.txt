@@ -18,3 +18,13 @@ markdownify>=0.13.1
 # Also run: playwright install chromium
 cf-clearance>=0.31.0
 playwright>=1.58.0
+
+# ---------------------------------------------------------------------------
+# n8n webhook server (telegram-job-assessment addon)
+# ---------------------------------------------------------------------------
+
+# HTTP server for the /ingest endpoint called by n8n
+flask>=3.0.0
+
+# Claude API — fit assessment inside the webhook server
+anthropic>=0.40.0
