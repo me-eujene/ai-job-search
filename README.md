@@ -8,22 +8,28 @@ An AI-powered job application framework built on [Claude Code](https://claude.co
 
 ## What this is
 
-A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (hiring.cafe, LinkedIn NL, Nationale Vacaturebank), but the pattern is designed to be swapped for your local job boards.
+A structured workflow that turns Claude Code into a full-stack job application assistant. The core workflow (self-profiling, fit evaluation, and the drafter-reviewer application pipeline) is **language- and country-agnostic**. The job portal search tools are built for the **Dutch market** (hiring.cafe, LinkedIn NL, Nationale Vacaturebank, Adzuna NL), but the pattern is designed to be swapped for your local job boards.
 
 ```
-/job-scraper-setup          /job-scraper-run              /job-scraper-apply <url>
-  |                |                     |
-  v                v                     v
-Fill in        Run Python           Evaluate fit
-your profile   job scraper          Score & recommend
-  |                |                     |
-  v                v                     v
-Profile        Present matches      Draft CV + Cover Letter
-files ready    with fit ratings     (LaTeX, tailored)
-                   |                     |
-                   v                     v
-               Pick a match         Reviewer agent critiques
-               -> /job-scraper-apply  -> Revise -> Final output
+/job-scraper-setup      /job-scraper-run          /job-scraper-apply <url>
+  |                           |                              |
+  v                           v                              v
+Fill in                 Run Python                   Evaluate fit
+your profile            job scraper                  Score & recommend
+  |                           |                              |
+  v                           v                              v
+Profile               Present matches              Candidate interview
+files ready           with fit ratings             Voice + authenticity inputs
+                            |                              |
+                            v                              v
+                      Pick a match              Draft CV + Cover Letter
+                      -> /job-scraper-apply      Framing approved before writing
+                                                 (PATH A: PDF edits /
+                                                  PATH B: LaTeX)
+                                                           |
+                                                           v
+                                                  Reviewer agent critiques
+                                                  -> Revise -> Final output
 ```
 
 The framework encodes career guidance best practices, including structured evaluation criteria and forward-looking cover letter framing.
@@ -57,7 +63,7 @@ cp job_scraper/.env.example job_scraper/.env
 # Edit .env: adjust search queries, NVB location, and title keywords
 ```
 
-No API keys required — all three sources use public endpoints.
+No API keys required — all four sources use public endpoints.
 
 ### 4. Set up your profile
 
@@ -121,14 +127,18 @@ ai-job-search/
 │   │   ├── types.py                   # Job dataclass + canonical key
 │   │   ├── helpers.py                 # HTTP client, date utils, title filter
 │   │   └── fetchers/
+│   │       ├── adzuna.py              # Adzuna NL public search API
 │   │       ├── hiringcafe.py          # hiring.cafe (Cloudflare bypass via Playwright)
 │   │       ├── linkedin.py            # LinkedIn NL guest API (no auth)
 │   │       └── nvb.py                 # Nationale Vacaturebank (public API)
 │   ├── .env.example                   # Configuration template
 │   └── requirements.txt
-├── cv/
-│   └── main_example.tex               # moderncv LaTeX template
-├── cover_letters/
+├── applications/                      # Per-application output folders
+│   └── <company>-<role>/
+│       ├── main_<company>.tex         # Tailored CV (PATH B)
+│       └── cover_<company>_<role>.tex # Cover letter (PATH B)
+├── templates/
+│   ├── main_example.tex               # moderncv LaTeX CV template
 │   ├── cover.cls                      # Custom cover letter LaTeX class
 │   └── OpenFonts/                     # Lato + Raleway fonts
 ├── job_search_tracker.csv             # Application tracking spreadsheet
@@ -147,26 +157,27 @@ ai-job-search/
 
 ## How `/job-scraper-apply` works
 
-The `/job-scraper-apply` command runs a **drafter-reviewer workflow**:
+The `/job-scraper-apply` command runs a **drafter-reviewer workflow** in six steps:
 
-1. **Parse** the job posting (URL or text)
-2. **Evaluate fit** against your profile (skills, experience, culture, location, career alignment)
-3. **Draft** a tailored CV and cover letter in LaTeX
-4. **Spawn a reviewer agent** that researches the company and critiques the drafts
-5. **Revise** based on the reviewer's feedback
-6. **Present** the final output with a verification checklist
+1. **Parse** the job posting (URL or pasted text)
+2. **Evaluate fit** — scores the role against your profile across skills, experience, culture, and career alignment; asks for go/no-go before proceeding
+3. **Candidate interview** — two short question sets before any drafting begins: one on what's relevant from your experience and how you work; one on why this role interests you. Your answers become the raw material for capability claims and motivation. The agent edits your words — it doesn't generate them from the profile.
+4. **Draft** — tailors CV and cover letter to the role. Proposes the cover letter framing (opening angle + motivation) and waits for your approval before writing. Two paths: PATH A for minor changes to an existing PDF/doc CV; PATH B for a full LaTeX rewrite into `applications/<company>-<role>/`.
+5. **Reviewer agent** — a second agent researches the company, extracts role keywords, and critiques the drafts for missed requirements, passive language, inauthenticity against your stated inputs, and style issues
+6. **Revise and present** — integrates reviewer feedback, then summarises the key tailoring decisions before finalising the files
 
-All claims in the CV and cover letter are verified against your actual profile. The system never fabricates skills or experience.
+The system enforces a strict no-fabrication rule: every claim is grounded in your actual profile. Stretch bullets are flagged with an explicit keep/soften/drop prompt.
 
 ## How the job scraper works
 
-The `job_scraper/` pipeline is a Python CLI with three fetchers:
+The `job_scraper/` pipeline is a Python CLI with four fetchers:
 
 | Source | Approach | Auth |
 |--------|----------|------|
 | **hiring.cafe** | Search API (`/api/search-jobs`) — Cloudflare bypass via `cf-clearance` (Playwright stealth browser, runs once per scrape) | None |
 | **LinkedIn NL** | Public guest API (`/jobs-guest/` endpoint) — HTML fragments parsed with BeautifulSoup | None |
 | **NVB** (Nationale Vacaturebank) | Public REST API with `dcoTitle` + location filters | None |
+| **Adzuna NL** | Public search API (`/api/v1/jobs/nl/search`) — results fetched by keyword query | None |
 
 All sources feed into a shared deduplication store (SQLite). Claude runs `python -m job_scraper` directly — no server process needed. Results are written to `job_scraper/last_run.json` and read back by Claude via the Read tool.
 
