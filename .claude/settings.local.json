@@ -30,7 +30,25 @@
       "mcp__plugin_chrome-devtools-mcp_chrome-devtools__get_network_request",
       "WebFetch(domain:www.indeed.com)",
       "Skill(add-job-source)",
-      "WebFetch(domain:pypi.org)"
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:jobs.lever.co)",
+      "WebFetch(domain:job-boards.greenhouse.io)",
+      "WebFetch(domain:www.adzuna.nl)",
+      "WebFetch(domain:hiring.cafe)",
+      "WebFetch(domain:careers.arrive.com)",
+      "WebFetch(domain:www.linkedin.com)",
+      "mcp__n8n-mcp__n8n_health_check",
+      "mcp__n8n-mcp__n8n_validate_workflow",
+      "mcp__n8n-mcp__n8n_update_partial_workflow",
+      "mcp__n8n-mcp__n8n_get_workflow",
+      "mcp__n8n-mcp__n8n_executions",
+      "mcp__n8n-mcp__tools_documentation"
     ]
+  },
+  "enabledMcpjsonServers": [
+    "n8n-mcp"
+  ],
+  "enabledPlugins": {
+    "n8n-mcp-skills@n8n-mcp-skills": true
   }
 }
