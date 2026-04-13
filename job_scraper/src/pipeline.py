@@ -11,7 +11,7 @@ import os
 from typing import Literal
 
 from .helpers import run_id_now, iso_ts, utc_now
-from .state import init_db, mark_seen_if_new, start_run, finish_run, log_error
+from .state import init_db, mark_seen_if_new, prune_old, start_run, finish_run, log_error
 from .types import Job
 
 logger = logging.getLogger(__name__)
@@ -64,6 +64,7 @@ async def run_pipeline(sources: list[Source] | None = None) -> dict:
     """
     sources = sources or ALL_SOURCES
     init_db()
+    prune_old()
     run_id  = run_id_now()
     started = iso_ts(utc_now())
     start_run(run_id, started)

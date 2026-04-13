@@ -164,6 +164,7 @@ async def fetch_hiringcafe(
                     break
 
                 skipped_title = 0
+                date_stop = False
                 for raw in raw_jobs:
                     if raw.get("is_expired"):
                         continue
@@ -178,7 +179,8 @@ async def fetch_hiringcafe(
 
                     date_str = v5.get("estimated_publish_date") or ""
                     if date_str and not is_within_days(date_str, lookback_days):
-                        continue
+                        date_stop = True
+                        break
 
                     job = _normalise(raw, v5, info, fetched_at)
                     if job is None:
@@ -193,6 +195,10 @@ async def fetch_hiringcafe(
                         "hiring.cafe '%s' page %d: skipped %d off-topic titles",
                         query, page_num, skipped_title,
                     )
+
+                if date_stop:
+                    logger.info("hiring.cafe '%s': hit lookback limit at page %d — done", query, page_num)
+                    break
 
                 if page_num < MAX_PAGES:
                     await asyncio.sleep(1.0)

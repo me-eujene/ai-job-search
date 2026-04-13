@@ -72,6 +72,21 @@ def init_db() -> None:
             con.execute("ALTER TABLE seen_jobs ADD COLUMN fetched_at TEXT")
 
 
+def prune_old(days: int | None = None) -> int:
+    """Delete seen_jobs rows older than `days` days. Returns number of rows deleted."""
+    retention = days if days is not None else int(os.environ.get("DEDUP_RETENTION_DAYS", "30"))
+    with _conn() as con:
+        cur = con.execute("""
+            DELETE FROM seen_jobs
+            WHERE first_seen < datetime('now', ? || ' days')
+        """, (f"-{retention}",))
+        pruned = cur.rowcount
+    if pruned:
+        import logging
+        logging.getLogger(__name__).info("state: pruned %d seen_jobs older than %d days", pruned, retention)
+    return pruned
+
+
 def mark_seen_if_new(canonical_key: str, title: str, company: str,
                      location: str, source: str, apply_url: str,
                      date_posted: str, description: Optional[str] = None,
