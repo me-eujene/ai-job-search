@@ -40,7 +40,6 @@ def init_db() -> None:
                 apply_url     TEXT,
                 date_posted   TEXT,
                 first_seen    TEXT NOT NULL,
-                description   TEXT,
                 fetched_at    TEXT
             );
 
@@ -64,28 +63,28 @@ def init_db() -> None:
                 ts         TEXT NOT NULL
             );
         """)
-        # Migrate existing databases that predate description/fetched_at columns.
+        # Migrate existing databases that predate fetched_at column.
         existing = {row[1] for row in con.execute("PRAGMA table_info(seen_jobs)")}
-        if "description" not in existing:
-            con.execute("ALTER TABLE seen_jobs ADD COLUMN description TEXT")
         if "fetched_at" not in existing:
             con.execute("ALTER TABLE seen_jobs ADD COLUMN fetched_at TEXT")
+        # Drop description column if present from older schema — too bulky for a dedupe store.
+        if "description" in existing:
+            con.execute("ALTER TABLE seen_jobs DROP COLUMN description")
 
 
 def mark_seen_if_new(canonical_key: str, title: str, company: str,
                      location: str, source: str, apply_url: str,
-                     date_posted: str, description: Optional[str] = None,
-                     fetched_at: Optional[str] = None) -> bool:
+                     date_posted: str, fetched_at: Optional[str] = None) -> bool:
     """Insert the job atomically. Returns True if inserted (new), False if already seen."""
     now = datetime.now(timezone.utc).isoformat()
     with _conn() as con:
         cur = con.execute("""
             INSERT OR IGNORE INTO seen_jobs
               (canonical_key, title, company, location, source, apply_url,
-               date_posted, first_seen, description, fetched_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               date_posted, first_seen, fetched_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (canonical_key, title, company, location, source,
-              apply_url, date_posted, now, description, fetched_at))
+              apply_url, date_posted, now, fetched_at))
         return cur.rowcount > 0
 
 
@@ -170,7 +169,7 @@ def get_jobs(
     with _conn() as con:
         rows = con.execute(f"""
             SELECT canonical_key, title, company, location, source,
-                   apply_url, date_posted, first_seen, description, fetched_at
+                   apply_url, date_posted, first_seen, fetched_at
             FROM seen_jobs
             {where}
             ORDER BY first_seen DESC
