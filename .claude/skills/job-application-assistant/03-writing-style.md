@@ -19,6 +19,22 @@
 - **Conversational professional.** Not stiff corporate-speak, not casual chat. Think: direct, clear, concise: how a confident person talks in a good job interview. 
 - **First person, active voice.** "I built" not "a system was developed by the candidate."
 - **Demonstrate, don't state.** Instead of "I am a team player", write a specific example of teamwork and its outcome. Watch the claims: should be rooted in reality and scaled properly.
+- **No editorial** This is not prose. This is almost a list of declarations, each of them demonstrates or highlights something user did or will do. No flourishes, very little adjectives.
+
+# Resume-specific
+
+- Header blob is tailored per role; however it always revolves around user's core identity and should not change much. 2 sentences max, never repeating the core claims from experience section
+- Core competencies: they answer the specific skill reqiurements from "what you'll bring" section of the job description. Domain-specific knowledge, relevant hard-skills go here. Stakeholder management is not a skill, generic role craft does not belong here.
+- Every bullet point is a declaration. Anything that does not fit into this framing, even grammatically, does not belong there.
+- Start every bullet with action verb or bold category, be specific: numbers, tools, outcomes
+
+# Cover letter specific
+
+- Size matters: max 200 words.
+- Cover letter's only possible framing is "what user brings to this role". This comes from the voice and motivation interview, if user can't state that, they are applying to a wrong role, say that aloud.
+- Again, this is not editorial prose, it's still a list of declarations, just a little bit more extentded to be readable, compared to the main cv.
+- Every word must have a role. Before writing a word, think if it adds substance.
+
 
 ## Application Headline (Best Practice)
 
@@ -35,7 +51,6 @@ Employers scan applications quickly. Structure for easy reading:
 - Use descriptive subheadings that reflect content (not just "Introduction" / "Body")
 - Include industry-specific keywords in headings where natural
 - Write concisely - eliminate filler language
-- One page maximum (hard rule)
 
 ## Forward-Looking Framing (Best Practice)
 
@@ -51,16 +66,14 @@ The cover letter is **not a CV repetition**. It should be forward-looking:
 ### Opening Paragraph
 - State the role and why you're writing (1 sentence)
 - Immediately connect your background to the role (1-2 sentences). Approve the framing with user before writing.
-- Make it specific to this company/role, not a template opener
+- Make it specific to this role, not a template opener
 
 ### Body Paragraphs - Task-Solving Focus
-- Lead with the most relevant experience for this specific role. This must be a hard transferrable skill.
+- Lead with the most relevant experience for this specific role. This must be ONE hard transferrable skill framed as "I can do what for you"
 - Frame content around **which of their tasks you can solve and how**. Always approve the framing with user before writing.
 - Describe your approach: methods, tools, and knowledge you'll bring
-- Use bullet lists for concrete skills/achievements when appropriate (3-5 bullets)
+- Use bullet lists for concrete skills when appropriate (3-5 bullets)
 - Each bullet should be specific and outcome-oriented
-- Include at least one example that shows initiative
-- Include 1-2 brief examples of past success, but keep the focus forward-looking
 
 ### Motivation / Why This Company (place early)
 - The **first section** after the opening should explain why you're applying to *this specific company*, or *this specific role*
@@ -91,11 +104,6 @@ The gerund opener creates distance. It wraps a past claim in nominalized framing
 This pattern also often signals a missing authentic thought — the agent has no real forward-looking claim to make, so it wraps a CV fact in gerund framing as a substitute. The fix is not syntactic; it's going back to the voice inputs for what the candidate actually wants to say.
 
 ---
-
-## Bullet Point Style
-- Start with action verb or bold category label
-- Be specific: numbers, tools, outcomes
-- Vary the structure (not every bullet starts the same way)
 
 ## Language for Different Role Types
 
