@@ -79,7 +79,7 @@ Write `applications/<folder>/cv.md` using the structure below. Draft from scratc
 
 ```markdown
 ## Profile
-[3–4 line profile statement tailored to this role]
+[2-sentence profile statement tailored to this role — core identity + role-specific emphasis; never repeats experience bullets]
 
 ## Core Competencies
 - **Category:** skills, tools, specifics
@@ -148,7 +148,7 @@ Kind regards,
 
 Rules:
 - Authenticity inputs anchor the motivation section — do not invent motivation
-- 250–300 word body maximum
+- 200 word body maximum (up to 300 still fits on page, but tight is better)
 - No em-dashes; no clichés ("passionate about", "leverage", "drive results")
 - Reference **Claude Code** by name if mentioning agentic coding or AI tooling
 
@@ -181,4 +181,14 @@ Then ask: "Ready to render to PDF, or do you want to make further edits?"
 ## Output contract
 
 - Files written: `applications/<folder>/cv.md`, `applications/<folder>/cover.md`
-- Returns to orchestrator: `framing_approval` (needed by reviewer)
+- Returns to orchestrator: `voice_inputs`, `authenticity_inputs`, `framing_approval`
+
+**IMPORTANT:** After writing the files, do NOT present the drafts to the user and do NOT ask what they'd like to do next. Return control to the orchestrator immediately.
+
+---
+
+## Hand-over
+
+**After draft (Steps 1–6):** Return `voice_inputs`, `authenticity_inputs`, `framing_approval` to the orchestrator. **Next step: orchestrator spawns `job-reviewer` (Phase 5)** via the Agent tool using the `job-reviewer` skill prompt template. Do not interact with the user until the reviewer returns.
+
+**After revise (revise mode):** Present the 3–5 key tailoring decisions and gaps summary to the user. Then ask: "Ready to render to PDF, or do you want to make further edits?" — If further edits: collect user comments, re-invoke `job-writer` with `mode: revise` and `user_comments`. If ready: **next step → load `latex-renderer` skill**, passing folder path.

@@ -207,6 +207,7 @@ cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 | `job-application-assistant/05-cv-templates.md` | Editorial CV guidance (section order, content rules) |
 | `job-application-assistant/06-cover-letter-templates.md` | Editorial cover letter guidance |
 | `job-application-assistant/07-latex-renderer-rules.md` | LaTeX rendering spec — md→tex mapping, escape rules, compile instructions |
+| `job-application-assistant/08-writing-style-review.md` | Reviewer checklist — writing style, tone, authenticity, and fabrication guard |
 | `job-application-assistant/09-interview-prep.md` | STAR examples, interview coaching |
 | `job-evaluate/SKILL.md` | Parse posting, score fit, write eval.md |
 | `job-writer/SKILL.md` | Interview candidate, draft cv.md + cover.md, handle revisions |

@@ -27,7 +27,7 @@ Add a 4th block only if the first three are short. Never add a 4th block to reac
 ## Length — Hard 1-Page Limit
 
 - Target: 1 page including signature block
-- **Word budget: 250–300 words** of body text. This is the safe maximum; 350 words will overflow.
+- **Word budget: 200 words** of body text. Up to 300 words still fits on page, but tight is better — cut to 200.
 - When adding company-specific content, trim elsewhere to compensate — never add net length
 
 ---

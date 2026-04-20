@@ -89,3 +89,9 @@ If cover letter overflows 1 page: trim the body to stay under 300 words. Do not 
 - PDFs compiled in: `cv/` and `cover_letters/`
 
 Report to user: verification checklist results (pass/fail per item) and file paths.
+
+---
+
+## Hand-over
+
+After reporting, return to the orchestrator. **Next step: Phase 8 complete.** Orchestrator prompts: "Application for [Role] at [Company] complete. Want to apply to another role?" If yes → return to Phase 2 shortlist. If no → end session.

@@ -100,4 +100,10 @@ After writing, display a brief summary to the user:
 - Top 2–3 matched strengths and top 2–3 gaps
 - Any deal-breakers
 
-Then ask: "Should I proceed with drafting the application for this role?" If no, stop.
+---
+
+## Hand-over
+
+**Called from `/search` batch flow (Phase 1):** Do NOT ask "should I proceed?" here — that decision happens in Phase 2 (shortlist). Return the eval object to the orchestrator immediately and continue assessing the next job.
+
+**Called standalone (`/job-scraper-apply` or ad-hoc):** Ask the user: "Should I proceed with drafting the application for this role?" If no, stop. If yes → load `job-writer` skill, passing: eval object, full job posting text, folder path.

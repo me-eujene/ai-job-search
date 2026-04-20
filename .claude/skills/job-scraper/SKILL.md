@@ -1,5 +1,5 @@
 ---
-name: job-scraper
+name: job-scraper-search
 description: "Searches Dutch job sites (Indeed NL, LinkedIn NL, Nationale Vacaturebank) for new positions, evaluates fit, and assists with applications: tailoring CVs, writing cover letters, and preparing for interviews. Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, /job-scraper-run, job posting, job application, CV, cover letter, resume, interview prep, job fit, career, application, apply"
 allowed-tools: "Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUserQuestion, Bash"
 ---
@@ -121,7 +121,7 @@ If the user picks a number, proceed with the **Application Workflow** below.
 When the user provides a job posting (URL or text), or selects a job from scrape results, follow this workflow.
 
 ### Step 1: Research & Evaluate Fit
-- Fetch the job posting content (use WebFetch for URLs, use Chrome for Cloudflare-protected sites)
+- Fetch the job posting content (use WebFetch for URLs, use Chrome for Cloudflare-protected sites; do not default to search, ask user for help if needed)
 - Save the role description to `JDs/YYYYMMDD_company_role.md`
 - Analyze the posting for required competencies, keywords, and priorities
 - Research the company (website, LinkedIn, mission, recent news)
@@ -136,12 +136,10 @@ When the user provides a job posting (URL or text), or selects a job from scrape
 
 _Only proceed if the user confirmed they want to apply._
 
-- Read the candidate's existing CVs from `cv/` (`.docx` or `.pdf` files) as baseline content — these are the source of truth for experience, dates, and phrasing
-- List existing LaTeX variants in `cv/` and pick the most recently modified tailored file as the structural starting point, or `cv/main_example.tex` if none exist
 - Follow the guidelines in `05-cv-templates.md`
 
 ### Step 3: Write Cover Letter
-- Follow the writing style rules in `03-writing-style.md` (critical: no em-dashes, no cliches)
+- Follow the writing style rules in `03-writing-style.md`
 - Follow the template structure in `06-cover-letter-templates.md`
 - Create `cover_letters/cover_<company>_<role>.tex`
 - Ensure the letter connects specific experience to the role requirements. Identify the top 3-5 keywords/requirements from the job description and make sure each is present or addressed.
@@ -156,7 +154,7 @@ After delivering the CV and cover letter, ask:
 > "Want me to prepare interview talking points for this role?"
 
 If yes:
-- Follow the framework in `07-interview-prep.md`
+- Follow the framework in `09-interview-prep.md`
 - Prepare STAR-format answers for likely questions
 - Identify role-specific talking points
 - Draft questions the candidate should ask the interviewer
@@ -173,7 +171,7 @@ If yes:
 | `04-job-evaluation.md` | Scoring framework for job fit |
 | `05-cv-templates.md` | LaTeX CV structure and tailoring rules |
 | `06-cover-letter-templates.md` | LaTeX cover letter structure and tailoring rules |
-| `07-interview-prep.md` | STAR examples, tough questions, roleplay guidelines |
+| `09-interview-prep.md` | STAR examples, tough questions, roleplay guidelines |
 
 ---
 

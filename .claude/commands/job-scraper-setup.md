@@ -155,7 +155,7 @@ Update career goals and motivation filters with their actual preferences.
 ### 5. Update `05-cv-templates.md`
 Add role-specific profile statement templates based on their background.
 
-### 6. Update `07-interview-prep.md`
+### 6. Update `09-interview-prep.md`
 Create STAR examples from their actual experience (at least 3-4 examples).
 
 ### 7. Create `cv/main_<lastname>.tex`
@@ -194,7 +194,7 @@ Present a summary:
 > - `.claude/skills/job-application-assistant/02-behavioral-profile.md` - Full behavioral assessment detail
 > - `.claude/skills/job-application-assistant/04-job-evaluation.md` - Personalized evaluation framework
 > - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
-> - `.claude/skills/job-application-assistant/07-interview-prep.md` - STAR examples from your experience
+> - `.claude/skills/job-application-assistant/09-interview-prep.md` - STAR examples from your experience
 > - `cv/main_<lastname>.tex` - Your LaTeX CV base (copied from `main_example.tex`)
 > - `.claude/skills/job-scraper/search-queries.md` - Job search queries for `/job-scraper-run`
 >

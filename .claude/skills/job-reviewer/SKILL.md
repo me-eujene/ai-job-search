@@ -66,6 +66,7 @@ Use WebSearch and WebFetch to research:
 - `.claude/skills/job-application-assistant/01-candidate-profile.md`
 - `.claude/skills/job-application-assistant/02-behavioral-profile.md`
 - `.claude/skills/job-application-assistant/03-writing-style.md`
+- `.claude/skills/job-application-assistant/08-writing-style-review.md`
 - `.claude/skills/job-application-assistant/04-job-evaluation.md`
 - `.claude/skills/job-application-assistant/05-cv-templates.md`
 - `.claude/skills/job-application-assistant/06-cover-letter-templates.md`
@@ -91,12 +92,13 @@ Based on your research, suggest specific angles to add. Connect experience to th
 Identify passive or generic statements and suggest action-oriented rewrites.
 
 **d) Tone and style issues**
-- Check against `03-writing-style.md`
+Run every check in `.claude/skills/job-application-assistant/08-writing-style-review.md`. Report pass/fail for each item. Key checks:
 - Authenticity check: does the motivation section use what the candidate actually said, or did it revert to generic language? Flag any passage that reads as constructed rather than rooted in the candidate's own words.
 - Flag em-dashes used as prose separators
 - Flag clichés: "passionate about", "great fit", "leverage", "drive results", "hit the ground running", false dichotomies
 - Flag gerund-as-subject constructions: "Verb+ing ... is something I ..." — rewrite as direct first-person claims
 - Flag generic buzzwords without concrete backing
+- Flag cover letter body exceeding 200 words
 
 **e) Verification checklist**
 Report pass/fail for each item:
@@ -121,3 +123,9 @@ Return your full feedback as a single structured message.
 ## Output contract
 
 Returns to the orchestrator: a single structured critique message. Pass this to `job-writer` as `critique`.
+
+---
+
+## Hand-over
+
+After returning the critique, the orchestrator calls `job-writer` with `mode: revise`, passing: `critique`, `voice_inputs`, `authenticity_inputs`, `framing_approval`, eval object, and full posting text. **Next step: Phase 6 — `job-writer` revise mode.**

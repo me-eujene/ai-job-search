@@ -8,7 +8,7 @@ Editorial guidance for writing and tailoring `cv.md`. All LaTeX rendering rules 
 
 ## Profile Statement / Elevator Pitch
 
-The most important section to tailor. Write 5–7 lines functioning as an elevator pitch: why you are qualified for *this specific role*. Focus on what the employer gains.
+The most important section to tailor. **2 sentences maximum.** Revolves around the candidate's core identity — does not change much between roles, only the emphasis shifts. Never repeats claims that appear in the experience bullets below.
 
 **Create 2–3 profile statement templates for your main role types:**
 
@@ -102,7 +102,7 @@ The CV **must** fit on exactly 2 pages. Use these content limits:
 
 | Section | Max budget |
 |---------|-----------|
-| Profile statement | 3–4 lines |
+| Profile statement | 2 sentences |
 | Skills | 5 items, each 1–2 lines |
 | Most recent role | 4–5 bullets |
 | Previous role | 2–3 bullets |
