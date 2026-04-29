@@ -16,9 +16,8 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).parent / ".env")
 
+from dataclasses import asdict
 from .src.pipeline import run_pipeline, ALL_SOURCES
-from .src.state import get_jobs
-from .src.helpers import iso_date, utc_now
 
 OUTPUT_FILE = Path(__file__).parent / "last_run.json"
 
@@ -37,16 +36,13 @@ async def main() -> None:
 
     summary = await run_pipeline(sources=args.sources)
 
-    # Fetch jobs inserted during this run only (skip if nothing new this run).
-    # Strip internal fields the agent doesn't need: canonical_key, first_seen,
-    # fetched_at, and description (too large; retrieved on demand per job).
-    _INTERNAL = {"first_seen", "fetched_at", "description"}
-    if summary["new_jobs"] > 0:
-        today = iso_date(utc_now())
-        raw_jobs = get_jobs(since=today)
-        jobs = [{k: v for k, v in j.items() if k not in _INTERNAL} for j in raw_jobs]
-    else:
-        jobs = []
+    # Serialise new Job objects from memory (includes description, excludes
+    # internal dedup fields the agent doesn't need).
+    _STRIP = {"canonical_key", "fetched_at"}
+    jobs = [
+        {k: v for k, v in asdict(job).items() if k not in _STRIP}
+        for job in summary.pop("jobs")
+    ]
 
     result = {**summary, "jobs": jobs}
     OUTPUT_FILE.write_text(

@@ -16,8 +16,8 @@ from .types import Job
 
 logger = logging.getLogger(__name__)
 
-Source = Literal["linkedin", "nvb", "hiringcafe", "adzuna"]
-ALL_SOURCES: list[Source] = ["linkedin", "nvb", "hiringcafe", "adzuna"]
+Source = Literal["linkedin", "nvb", "hiringcafe", "adzuna", "workingnomads"]
+ALL_SOURCES: list[Source] = ["linkedin", "nvb", "hiringcafe", "adzuna", "workingnomads"]
 
 
 def _get_queries() -> list[str]:
@@ -49,6 +49,10 @@ async def _fetch_source(source: Source, queries: list[str]) -> tuple[list[Job], 
         if source == "adzuna":
             from .fetchers.adzuna import fetch_adzuna
             return await fetch_adzuna(queries or None), None
+
+        if source == "workingnomads":
+            from .fetchers.workingnomads import fetch_workingnomads
+            return await fetch_workingnomads(), None
 
     except Exception as e:
         return [], f"{source} fetch failed: {e}"
@@ -100,7 +104,6 @@ async def run_pipeline(sources: list[Source] | None = None) -> dict:
             source=job.source,
             apply_url=job.apply_url,
             date_posted=job.date_posted,
-            description=job.description,
             fetched_at=job.fetched_at,
         )
         if inserted:
@@ -132,6 +135,7 @@ async def run_pipeline(sources: list[Source] | None = None) -> dict:
         "skipped":       skipped,
         "sources":       source_counts,
         "errors":        errors,
+        "jobs":          new_jobs_list,   # in-memory Job objects; carry description
     }
     logger.info("Pipeline run %s done — %s", run_id, summary)
     return summary
