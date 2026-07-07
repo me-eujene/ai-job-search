@@ -9,7 +9,7 @@ Editorial guidance for writing and tailoring `cover.md`. All LaTeX rendering rul
 A cover letter has three blocks:
 
 1. **Opening paragraph** — role name, how your background connects, 2–3 sentences
-2. **Body paragraph** — most relevant experience + 3–5 concrete achievement bullets
+2. **Body paragraph** — intro sentence + 3–5 bullets framed as the tasks/problems you would take on in this role (forward-looking), not a recap of past duties
 3. **Closing paragraph** — connection to this company specifically, why this role, 2–3 sentences
 
 Add a 4th block only if the first three are short. Never add a 4th block to reach length.
@@ -36,7 +36,8 @@ Add a 4th block only if the first three are short. Never add a 4th block to reac
 
 - 3–5 bullets in the body paragraph
 - Start each bullet with a bold label or action verb
-- Make each bullet concrete: specific outcome, not a duty
+- Frame each bullet as a forward-looking task or problem you would own in the role, not past evidence (achievements live in the CV)
+- Keep each bullet concrete and specific
 
 ---
 

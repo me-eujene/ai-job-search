@@ -51,9 +51,14 @@ cd ai-job-search
 
 ### 2. Install job scraper dependencies
 
+The project uses [uv](https://docs.astral.sh/uv/) for env management. From the repo root:
+
 ```bash
-pip install -r job_scraper/requirements.txt
+uv venv
+uv pip install -r job_scraper/requirements.txt
 ```
+
+`uv run python -m job_scraper` (used by `/search`) runs against this `.venv`.
 
 ### 3. Configure the scraper
 
@@ -63,6 +68,8 @@ cp job_scraper/.env.example job_scraper/.env
 ```
 
 No API keys required for six of the seven sources. **Adzuna NL** needs a free App ID/App Key from [developer.adzuna.com](https://developer.adzuna.com) — without it, Adzuna is silently skipped and the rest still run.
+
+You can skip the manual `.env` edit if you prefer — the `/job-scraper-setup` interview in the next step configures `.env` for you.
 
 ### 4. Set up your profile
 
@@ -109,8 +116,7 @@ ai-job-search/
 │   ├── skills/
 │   │   ├── job-application-assistant/  # Core application skill
 │   │   │   ├── SKILL.md               # Skill definition
-│   │   │   ├── 01-candidate-profile.md  # Identity, experience, Claims Inventory
-│   │   │   ├── 02-behavioral-profile.md
+│   │   │   ├── 01-candidate-profile.example.md  # Template seed (real 01-candidate-profile.md is gitignored personal data)
 │   │   │   ├── 03-writing-style.md
 │   │   │   ├── 04-job-evaluation.md
 │   │   │   ├── 05-cv-templates.md
@@ -199,15 +205,25 @@ Sources run concurrently and feed into a shared deduplication store (SQLite), wi
 
 ## Customization
 
+### Personal data vs. template seeds
+
+Files that hold your real personal data are **gitignored** — only their `*.example` template seeds are tracked (the same pattern as `.env` / `.env.example`). `/job-scraper-setup` writes the real files for you; if editing manually, copy the seed to the real path and fill it in.
+
+| Real file (gitignored — your data) | Tracked seed |
+|------------------------------------|--------------|
+| `.claude/…/01-candidate-profile.md` | `01-candidate-profile.example.md` |
+| `job_search_tracker.csv` | `job_search_tracker.example.csv` |
+| `cv/templates.md` | `cv/templates.example.md` |
+| personal `cv/*.tex` | `cv/main_example.tex` |
+
 ### Which files to edit manually
 
 If you prefer editing files directly instead of using `/job-scraper-setup`:
 
 | File | What to change |
 |------|---------------|
-| `01-candidate-profile.md` | Your full profile: identity, education, experience, Core Definition (single-line identity), Claims Inventory (capability/exposure/hygiene claims), Framing Notes, career goals |
-| `02-behavioral-profile.md` | Your behavioral assessment or self-assessment |
-| `04-job-evaluation.md` | Skill match areas, career goals, motivation filters |
+| `01-candidate-profile.md` | Your full profile (copy from `01-candidate-profile.example.md`): identity, education, experience, Core Definition (single-line identity), Claims Inventory (capability/exposure/hygiene claims), Framing Notes, behavioral summary, career goals |
+| `04-job-evaluation.md` | Scoring framework only — reads your skills/goals from `01-candidate-profile.md`, no edits needed |
 | `05-cv-templates.md` | CV section rules — tied to the Claims Inventory in `01-candidate-profile.md` |
 | `09-interview-prep.md` | Your STAR examples from actual experience |
 | `search-queries.md` | Job search queries used by the scraper |

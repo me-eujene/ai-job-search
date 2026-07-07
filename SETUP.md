@@ -14,12 +14,13 @@ npm install -g @anthropic-ai/claude-code
 
 You'll need an Anthropic API key or a Claude Pro/Team subscription. See the [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code) for details.
 
-### Python 3.10+
+### Python 3.10+ and uv
 
-Required for the job scraper. Check with:
+Required for the job scraper, which is run via [uv](https://docs.astral.sh/uv/). Check with:
 
 ```bash
 python --version
+uv --version   # install from https://docs.astral.sh/uv/ if missing
 ```
 
 ### LaTeX (for compiling CVs and cover letters)
@@ -50,20 +51,25 @@ If you want to review or adjust what is permitted, open the file:
 ```
 
 Key permissions pre-approved:
-- `Skill(job-scraper)` — lets Claude run `/job-scraper-run` without prompting
+- `Skill(job-scraper)` — lets Claude run `/search` without prompting
 - `Bash(python:*)` / `Bash(python3:*)` — runs the job scraper
 - `Bash(git:*)` — lets Claude commit and push
 - `Bash(gh repo:*)` — GitHub CLI operations
 
 To add or remove permissions, run `/update-config` inside Claude Code and describe the change in plain English.
 
-## 5. Install scraper dependencies
+## 4. Install scraper dependencies
+
+From the repo root, create a uv virtual environment and install into it:
 
 ```bash
-pip install -r job_scraper/requirements.txt
+uv venv
+uv pip install -r job_scraper/requirements.txt
 ```
 
-## 4. Configure the scraper
+The scraper is then run with `uv run python -m job_scraper`.
+
+## 5. Configure the scraper
 
 ```bash
 cp job_scraper/.env.example job_scraper/.env
@@ -71,12 +77,12 @@ cp job_scraper/.env.example job_scraper/.env
 
 Open `job_scraper/.env` and fill in:
 
-- **`RAPIDAPI_KEY`** — required for Indeed NL and LinkedIn NL. Get a free key at [rapidapi.com](https://rapidapi.com/letscrape-6bRBa3QguO5/api/jobs-api14) (200 requests/month free tier).
-- **`SEARCH_QUERIES`** — comma-separated job titles to search (e.g. `product manager,product owner`).
+- **`SEARCH_QUERIES`** — comma-separated job titles to search (e.g. `product manager,product owner`). Sent to LinkedIn NL, hiring.cafe, and Adzuna NL.
 - **`NVB_DCO_TITLE`** — NVB taxonomy title matching your role (default: `Productmanager`).
 - **`NVB_CITY`** / **`NVB_DISTANCE_KM`** — your target city and commute radius.
+- **`ADZUNA_APP_ID`** / **`ADZUNA_APP_KEY`** — optional; a free key from [developer.adzuna.com](https://developer.adzuna.com) enables the Adzuna NL source. Without it, Adzuna is silently skipped and the other six sources still run.
 
-NVB (Nationale Vacaturebank) requires no API key.
+Six of the seven sources need no API key.
 
 ## 6. Run the setup interview
 
@@ -101,16 +107,16 @@ Both paths produce the same result: fully populated profile files.
 
 ### What gets populated
 
+Files holding your real data (`01-candidate-profile.md`, `job_search_tracker.csv`, `cv/templates.md`, rendered `cv/*.tex`) are **gitignored** — the repo tracks only their `*.example` seeds (like `.env` / `.env.example`). Setup writes the real files locally; they are never committed.
+
 | File | Content |
 |------|---------|
-| `CLAUDE.md` | Your full candidate profile |
-| `01-candidate-profile.md` | Structured education, experience, skills |
-| `02-behavioral-profile.md` | Behavioral assessment |
-| `04-job-evaluation.md` | Personalized skill match areas and career goals |
+| `01-candidate-profile.md` | Single source of truth (gitignored; seed: `01-candidate-profile.example.md`): identity, education, experience, Claims Inventory, Framing Notes, behavioral summary, career goals |
+| `04-job-evaluation.md` | Scoring framework (reads your data from `01-candidate-profile.md`) |
 | `05-cv-templates.md` | CV templates with your profile statements |
-| `07-interview-prep.md` | STAR examples from your experience |
+| `09-interview-prep.md` | STAR examples from your experience |
 | `cv/main_<lastname>.tex` | Your LaTeX CV (copied from `main_example.tex`) |
-| `search-queries.md` | Job search queries for `/job-scraper-run` fallback |
+| `search-queries.md` | Job search queries for `/search` fallback |
 
 ### Re-running setup
 
@@ -129,10 +135,10 @@ The `--section search` option is especially useful as your priorities evolve.
 ### Search for jobs
 
 ```
-/job-scraper-run
+/search
 ```
 
-Claude runs the Python scraper, fetches from all configured sources, and presents matches. Typical first run takes 10–30 seconds.
+Claude runs the Python scraper, fetches from all configured sources, deduplicates, evaluates fit, and presents a ranked shortlist. Typical first run takes 10–30 seconds.
 
 ### Apply to a job
 
@@ -170,7 +176,7 @@ cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 ### Scraper not returning results
 
 1. Check that `job_scraper/.env` exists (copy from `.env.example` if not)
-2. For Indeed/LinkedIn results: ensure `RAPIDAPI_KEY` is set in `.env`; NVB works without a key
+2. Six of the seven sources need no key; only Adzuna NL requires `ADZUNA_APP_ID`/`ADZUNA_APP_KEY`
 3. Verify `NVB_DCO_TITLE` matches a valid NVB taxonomy title for your role
 
 ### LaTeX compilation errors

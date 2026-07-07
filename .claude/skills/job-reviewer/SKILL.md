@@ -70,7 +70,6 @@ Use WebSearch and WebFetch to research:
 
 ### 2. Read all reference materials
 - `.claude/skills/job-application-assistant/01-candidate-profile.md`
-- `.claude/skills/job-application-assistant/02-behavioral-profile.md`
 - `.claude/skills/job-application-assistant/03-writing-style.md`
 - `.claude/skills/job-application-assistant/08-writing-style-review.md`
 - `.claude/skills/job-application-assistant/04-job-evaluation.md`

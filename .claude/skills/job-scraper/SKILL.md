@@ -1,6 +1,6 @@
 ---
 name: job-scraper-search
-description: "Searches Dutch job sites (Indeed NL, LinkedIn NL, Nationale Vacaturebank) for new positions, evaluates fit, and assists with applications: tailoring CVs, writing cover letters, and preparing for interviews. Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, /job-scraper-run, job posting, job application, CV, cover letter, resume, interview prep, job fit, career, application, apply"
+description: "Searches Dutch-market and global remote job sites (LinkedIn NL, Nationale Vacaturebank, Adzuna NL, hiring.cafe, We Work Remotely, Welcome to the Jungle, Working Nomads) for new positions, evaluates fit, and assists with applications: tailoring CVs, writing cover letters, and preparing for interviews. Triggers on: job scrape, find jobs, search jobs, new jobs, job search, scrape jobs, job posting, job application, CV, cover letter, resume, interview prep, job fit, career, application, apply"
 allowed-tools: "Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUserQuestion, Bash"
 ---
 
@@ -8,11 +8,14 @@ allowed-tools: "Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent, AskUs
 
 ## How It Works
 
-The `job_scraper/` Python pipeline fetches jobs from four Dutch sources:
+The `job_scraper/` Python pipeline fetches jobs from seven sources — Dutch-market and global remote:
 - **LinkedIn NL** — public guest API, no auth required
 - **NVB** (Nationale Vacaturebank) — public REST API, no auth required, city-radius filters
-- **Hiring.cafe** — Cloudflare-protected; uses cf-clearance + Playwright for initial cookie
+- **hiring.cafe** — public Next.js SSR data endpoint, no auth required
 - **Adzuna NL** — official REST API; requires `ADZUNA_APP_ID` + `ADZUNA_APP_KEY` (free tier at developer.adzuna.com)
+- **We Work Remotely** — public RSS feed, no auth required
+- **Welcome to the Jungle** — public Algolia index, no auth required
+- **Working Nomads** — public Elasticsearch endpoint, no auth required
 
 State is stored in a SQLite database (`job_scraper/state.db`). The pipeline runs on demand — Claude triggers it directly with a Bash command from the repo root. No server process is needed.
 
@@ -24,22 +27,22 @@ The user triggers the scraping workflow by saying things like:
 - "Find new jobs"
 - "Scrape for jobs"
 - "Any new positions?"
-- "/job-scraper-run"
+- "/search"
 
 ### Step 1: Run the pipeline
 
 From the repo root:
 ```bash
-python -m job_scraper
+uv run python -m job_scraper
 ```
 
-To run a single source: `python -m job_scraper --sources nvb`
+To run a single source: `uv run python -m job_scraper --sources nvb`
 
 Wait for the command to complete (typically 10–30 seconds). It writes results to `job_scraper/last_run.json`.
 
 **If the command fails** (import error, missing `.env`, API key not set):
-- Check `job_scraper/.env` exists; if running Indeed/LinkedIn, ensure `RAPIDAPI_KEY` is set (NVB works without it)
-- Check dependencies are installed: `pip install -r job_scraper/requirements.txt`
+- Check `job_scraper/.env` exists; only Adzuna NL needs a key (`ADZUNA_APP_ID`/`ADZUNA_APP_KEY`), the other six sources run without one
+- Check dependencies are installed: `uv pip install -r job_scraper/requirements.txt`
 
 ### Step 2: Read results
 
@@ -165,8 +168,7 @@ If yes:
 
 | File | Purpose |
 |------|---------|
-| `01-candidate-profile.md` | Education, experience, skills, publications, awards |
-| `02-behavioral-profile.md` | Behavioral assessment, strengths, ideal environments |
+| `01-candidate-profile.md` | Education, experience, skills, publications, awards, behavioral summary — single source of truth |
 | `03-writing-style.md` | Tone, structure, do's and don'ts |
 | `04-job-evaluation.md` | Scoring framework for job fit |
 | `05-cv-templates.md` | LaTeX CV structure and tailoring rules |
@@ -182,7 +184,7 @@ The user may ask for individual steps without running the full workflow:
 - "Write a CV for [company]" — Run Application Step 1 first to fetch the posting and extract role requirements, then proceed directly to Step 2 without asking whether to continue.
 - "Write a cover letter for [role] at [company]" — Application Step 3 only. Same prerequisite: a job posting must be in context.
 - "Help me prepare for an interview at [company]" — Application Step 5 only
-- "What jobs should I look for?" — Career strategy discussion. Read `01-candidate-profile.md`, `02-behavioral-profile.md`, and `04-job-evaluation.md`. Discuss target roles, sectors, deal-breakers, and positioning.
+- "What jobs should I look for?" — Career strategy discussion. Read `01-candidate-profile.md` and `04-job-evaluation.md`. Discuss target roles, sectors, deal-breakers, and positioning.
 
 ---
 

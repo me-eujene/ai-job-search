@@ -1,56 +1,63 @@
-# Candidate Profile
+# Candidate Profile — [YOUR_NAME]
 
-<!-- SETUP: This file is populated by running /job-scraper-setup -->
-<!-- After running /job-scraper-setup, all sections will be filled with your actual information -->
+<!--
+  This is the TEMPLATE seed. It is the only version tracked in git.
+  Copy it to `01-candidate-profile.md` (which is gitignored) and fill it with
+  your real data — or run `/job-scraper-setup`, which writes that file for you.
+  Never commit `01-candidate-profile.md`; it holds personal data.
+-->
 
 ## Core Definition
-> **[YOUR_SINGLE_LINE_IDENTITY — the kind of professional you are, not an achievement]**
+> **[ONE-LINE IDENTITY — what *kind* of professional you are, e.g. "PM for technical products on the supply/platform side, strongest in ambiguous 0-to-1 environments." No achievements, no "N+ years", no domain list.]**
 >
 > This is the single-line identity. It must shine through every CV profile statement, cover letter opening, and fit assessment — verbatim, never paraphrased.
 
 ## Identity
 - **Name:** [YOUR_NAME]
-- **Location:** [YOUR_ADDRESS]
-- **Phone:** [YOUR_PHONE]
-- **Email:** [YOUR_EMAIL]
-- **LinkedIn:** [YOUR_LINKEDIN_URL]
-- **GitHub:** [YOUR_GITHUB_URL]
-- **Languages:** [YOUR_LANGUAGES with proficiency levels]
-- **Status:** [YOUR_EMPLOYMENT_STATUS]
-- **Constraints:** [YOUR_COMMUTE_OR_LOCATION_CONSTRAINTS]
+- **Location:** [CITY, POSTCODE, COUNTRY]
+- **Phone:** [PHONE]
+- **Email:** [EMAIL]
+- **LinkedIn:** [LINKEDIN_URL]
+- **GitHub:** [GITHUB_URL or —]
+- **Languages:** [LANGUAGE (native), LANGUAGE (fluent)]
+- **Status:** [e.g. Actively looking (as of ...)]
+- **Constraints:** [location / hybrid / remote / relocation constraints]
+
+---
 
 ## Education
 
 | Degree | Period | Institution | Key Topics |
 |--------|--------|-------------|------------|
-| [DEGREE] | [YEARS] | [INSTITUTION] | [TOPICS] |
+| [DEGREE] | [YYYY–YYYY] | [INSTITUTION] | [KEY TOPICS] |
+| [CERTIFICATION] | [Completed] | [PROVIDER] | [TOPICS] |
+
+---
 
 ## Professional Experience
 
-### [JOB_TITLE] - [COMPANY] ([START] - [END])
-[LOCATION]
-- [RESPONSIBILITY_OR_ACHIEVEMENT_1]
-- [RESPONSIBILITY_OR_ACHIEVEMENT_2]
-- [RESPONSIBILITY_OR_ACHIEVEMENT_3]
+### [JOB_TITLE] — [COMPANY] ([Mon YYYY] – [Mon YYYY])
+[City, Country]
 
-<!-- Add more roles as needed -->
+- [Achievement bullet with a concrete outcome or metric.]
+- [Achievement bullet — what you owned, what changed, the number.]
+- [Achievement bullet.]
+
+### [JOB_TITLE] — [COMPANY] ([Mon YYYY] – [Mon YYYY])
+[City, Country]
+
+- [Achievement bullet.]
+- [Achievement bullet.]
+
+<!-- Add one subsection per role, most recent first. -->
+
+---
 
 ## Independent Projects
-<!-- Projects outside of employment: freelance, open source, personal -->
-- **[PROJECT_NAME]**: [DESCRIPTION]
 
-## Technical Skills
+- **[PROJECT_NAME]** ([Year]): [one–two lines — what it is, what you built, the stack]. Side-project depth. [LINK]
 
-### Programming & ML
-- **[LANGUAGE]** ([PROFICIENCY]): [FRAMEWORKS_AND_LIBRARIES]
-- [OTHER_SKILLS]
-
-### Domain Expertise
-- [DOMAIN_1]
-- [DOMAIN_2]
-
-### Software & Tools
-- [TOOL_LIST]
+---
 
 ## Claims Inventory
 
@@ -100,41 +107,46 @@ These are instructions for tailoring, kept separate from the factual record so t
 ---
 
 ## Publications
-<!-- List peer-reviewed publications, if any -->
-1. [AUTHOR_LIST] ([YEAR]). [TITLE]. [JOURNAL]. [DOI_LINK]
+None.
 
 ## Awards
-- [AWARD] - [EVENT] ([YEAR])
+None.
 
 ## References
-- [NAME], [TITLE], [COMPANY] ([EMAIL], [PHONE])
-
-More references available upon request.
+Available upon request.
 
 ---
 
 ## Behavioral Summary
 
-<!-- Full behavioral detail is in 02-behavioral-profile.md. This is the quick-reference summary for fit assessment. -->
+<!-- This is the single source of behavioral data for fit assessment and drafting. -->
 
-- **Profile type:** [PROFILE_TYPE]
-- **Strengths:** [YOUR_STRENGTHS]
-- **Growth areas:** [YOUR_GROWTH_AREAS]
-- **Thrives in:** [YOUR_IDEAL_ENVIRONMENT]
-- **What excites you:** [PASSION_1], [PASSION_2]
+- **Profile type:** [e.g. Builder-PM — energised by 0-to-1 work]
+- **Role identity:** [how you actually work — the shape of role that fits]
+- **Strengths:** [3–5 strengths]
+- **Growth areas:** [honest growth areas]
+- **Thrives in:** [environment / team / company type]
+- **What excites you:** [the work that energises you]
 
 ---
 
 ## Career Goals & Target Sectors
 
 ### Target roles
-- [YOUR_CAREER_GOAL_1]
-- [YOUR_CAREER_GOAL_2]
+- [TARGET_ROLE_1]
+- [TARGET_ROLE_2]
 
 ### Target sectors
-- [SECTOR_1]: [EXAMPLE_COMPANIES]
-- [SECTOR_2]: [EXAMPLE_COMPANIES]
+- **[SECTOR_1]:** [detail]
+- **[SECTOR_2]:** [detail]
+
+### CV Templates
+
+| Role type | Starting template |
+|-----------|------------------|
+| [ROLE_TYPE] | [path to a starting .tex, or `cv/main_example.tex`] |
 
 ### Deal-breakers
-- [DEALBREAKER_1]
-- [DEALBREAKER_2]
+- [DEAL_BREAKER_1]
+- [DEAL_BREAKER_2]
+- [Companies/sectors to always exclude]

@@ -28,9 +28,7 @@ How well do the required/preferred skills align with the candidate's capabilitie
 | 40-59 | Partial match, significant upskilling needed |
 | 0-39 | Fundamental mismatch |
 
-**Strong match areas:** [YOUR_PRIMARY_SKILLS]
-**Moderate match areas:** [YOUR_SECONDARY_SKILLS]
-**Weak match areas:** [SKILLS_YOU_LACK]
+Judge match strength against the candidate's skills and Claims Inventory in `01-candidate-profile.md` (`capability` claims are strong-match areas; `exposure` items are weak/learnable; anything absent is a gap).
 
 ### 2. Experience Match (0-100)
 Does work history align with what they're looking for?
@@ -42,9 +40,7 @@ Does work history align with what they're looking for?
 | 40-59 | Adjacent experience, would need to make the case |
 | 0-39 | Unrelated experience |
 
-**Strong:** [YOUR_DIRECT_EXPERIENCE_DOMAINS]
-**Moderate:** [YOUR_ADJACENT_EXPERIENCE]
-**Entry-level:** [ROLES_WITH_LIMITED_EXPERIENCE]
+Map work history against the Experience section of `01-candidate-profile.md` — direct-domain roles score high, adjacent/transferable experience scores moderate, unrelated history scores low.
 
 ### 3. Behavioral/Culture Fit (0-100)
 Does the role and company culture match the behavioral profile?
@@ -74,20 +70,9 @@ Does this role advance career goals and contain tasks that energize?
 | 40-59 | Decent job but doesn't build toward career goals |
 | 0-39 | Dead end or backwards step |
 
-**Career goals:**
-- [YOUR_CAREER_GOAL_1]
-- [YOUR_CAREER_GOAL_2]
-- [YOUR_CAREER_GOAL_3]
+**Career goals, energizing/draining tasks, and life-situation constraints:** read these from the Career Goals, behavioral summary, and deal-breakers sections of `01-candidate-profile.md` — do not hardcode them here.
 
-**Motivation filter:** Evaluate not just whether you *can* do the tasks, but whether the tasks will *energize* you. Consider:
-- Tasks that energize: [YOUR_ENERGIZING_TASKS]
-- Tasks that drain: [YOUR_DRAINING_TASKS]
-- Non-task factors: leadership style, department culture, company values, degree of autonomy
-
-**Life situation alignment:** Consider personal constraints:
-- **Security**: [YOUR_FINANCIAL_SITUATION_CONTEXT]
-- **Flexibility**: [YOUR_SCHEDULE_CONSTRAINTS]
-- **Professional development**: [YOUR_GROWTH_PRIORITIES]
+**Motivation filter:** Evaluate not just whether the candidate *can* do the tasks, but whether the tasks will *energize* them. Also weigh non-task factors: leadership style, department culture, company values, degree of autonomy.
 
 
 ## Output Format

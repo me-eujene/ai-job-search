@@ -30,6 +30,22 @@ job_scraper/*.md
 linkedin_Profile.pdf
 _backups/
 
+# --- Filled personal application data ---
+# Only the *.example template seeds are tracked. The real filled files below are
+# personal and must never be committed. Copy a seed, fill it locally, keep it here.
+/.claude/skills/job-application-assistant/01-candidate-profile.md
+/job_search_tracker.csv
+/applications/
+# Personal CV / cover-letter LaTeX — only the templates are tracked
+cv/*.tex
+!cv/main_example.tex
+cover_letters/cover_*.tex
+# Personal CV-variant index — seed is cv/templates.example.md
+/cv/templates.md
+# Scratch job lists
+jobs_list.txt
+_job_batch_*.txt
+
 # Personal photos and signatures
 *.jpg
 *.jpeg

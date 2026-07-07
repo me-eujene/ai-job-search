@@ -56,6 +56,7 @@ cd cv && pdflatex main_<company>.tex && cd ..
 | `## Experience` heading | `\section{Professional Experience}\vspace{3pt}\begin{itemize}` |
 | `### Title — Company (YYYY–YYYY) \| City` | `\item{\cventry{YYYY--YYYY}{Title}{Company}{City, Country}{}{\vspace{1pt}` |
 | `-` bullets under experience entry | inner `\begin{itemize}\item ...\vspace{1pt}\end{itemize}` |
+| `## Personal Projects` + bullet list | `\section{Personal Projects}\vspace{1pt}\begin{itemize}` with `\item \textbf{Project} (Year). detail` per item |
 | `## Education` heading | `\section{Education}\vspace{1pt}\begin{itemize}` |
 | `### Degree — Institution (YYYY–YYYY) \| City` | `\item{\cventry{YYYY--YYYY}{Degree in Field}{Institution}{City, Country}{}{\vspace{1pt}` |
 | `## Languages` + inline list | `\section{Languages}\vspace{1pt}\begin{itemize}\item ...` |

@@ -39,7 +39,7 @@ If the folder `applications/<folder_name>/` does not exist, create it.
 
 Read `.claude/skills/job-application-assistant/01-candidate-profile.md`.
 
-If the file contains template placeholders like `[YOUR_NAME]`, `[YOUR_EXPERIENCE]`, or similar unfilled tokens — the profile has not been set up. Stop here and tell the user:
+If the file is missing (a fresh clone tracks only the `01-candidate-profile.example.md` seed) or contains template placeholders like `[YOUR_NAME]`, `[YOUR_EXPERIENCE]`, or similar unfilled tokens — the profile has not been set up. Stop here and tell the user:
 
 > "The candidate profile hasn't been populated yet. Run `/job-scraper-setup` first to set up your profile, then re-run this evaluation."
 
@@ -62,19 +62,19 @@ location: <location>
 posting_language: <en|nl>
 folder: applications/<folder_name>/
 
-fit_score: <overall 1-10>
-recommendation: <strong fit | moderate fit | weak fit | skip>
+fit_score: <overall 0-100, weighted per 04-job-evaluation.md>
+recommendation: <strong fit (75+) | good fit (60-74) | moderate fit (45-59) | weak fit (30-44) | skip (<30)>
 
 dimensions:
   skills_match:
-    score: <1-10>
+    score: <0-100>
     matched: [list of matched required/preferred skills]
     gaps: [list of missing required skills]
   experience_match:
-    score: <1-10>
+    score: <0-100>
     summary: <how work history maps to the role>
   behavioral_match:
-    score: <1-10>
+    score: <0-100>
     summary: <how behavioral profile fits role/company culture>
 
 keywords: [10 keywords describing the role and company]

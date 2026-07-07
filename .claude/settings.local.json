@@ -4,6 +4,7 @@
       "Skill(job-scraper)",
       "Bash(python3:*)",
       "Bash(python:*)",
+      "Bash(uv:*)",
       "Bash(curl:*)",
       "Bash(uvicorn:*)",
       "Bash(pip install:*)",
@@ -47,7 +48,9 @@
       "Skill(job-writer)",
       "Skill(job-reviewer)",
       "Skill(latex-renderer)",
-      "Bash(echo \"grep exit: $?\")"
+      "Bash(echo \"grep exit: $?\")",
+      "Bash(echo \"--- exit: $? \\(no output = identical\\) ---\")",
+      "Bash(echo \"--- exit: $? ---\")"
     ]
   },
   "enabledMcpjsonServers": [

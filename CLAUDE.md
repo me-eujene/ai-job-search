@@ -11,7 +11,7 @@ This repo is a job application workspace. Claude acts as a career advisor helpin
 
 See `.claude/skills/job-application-assistant/01-candidate-profile.md` for the full candidate profile (identity, education, experience, skills, behavioral summary, career goals, and deal-breakers).
 
-<!-- IF 01-candidate-profile.md IS NOT FILLED IN — ABORT AND RUN /job-scraper-setup -->
+<!-- `01-candidate-profile.md` is gitignored personal data; the tracked `01-candidate-profile.example.md` is the template seed. IF the real file is MISSING (fresh clone) or NOT FILLED IN — ABORT AND RUN /job-scraper-setup. -->
 
 ## Repo Structure
 
@@ -86,7 +86,7 @@ Rank evaluated roles by `fit_score` descending. `[thin]` jobs appear at the bott
 |-----------|---------|
 | Normal | Ranked row with score and recommendation |
 | `deal_breakers` non-empty | Flagged `[deal-breaker]` — shown, not hidden |
-| `fit_score < 4` | Flagged `[weak fit]` — shown at bottom |
+| `fit_score < 45` | Flagged `[weak fit]` — shown at bottom |
 | `[thin]` | "Limited description — open link before deciding." No score. |
 
 Ask: "Which role would you like to apply to? Enter a number, or 'done' to exit."
@@ -211,8 +211,7 @@ cd cover_letters && xelatex cover_<company>_<role>.tex && cd ..
 
 | Skill | Role |
 |-------|------|
-| `job-application-assistant/01-candidate-profile.md` | Candidate data — single source of truth |
-| `job-application-assistant/02-behavioral-profile.md` | Behavioral assessment detail |
+| `job-application-assistant/01-candidate-profile.md` | Candidate data — single source of truth (includes behavioral summary) |
 | `job-application-assistant/03-writing-style.md` | Tone, anti-patterns, writing rules |
 | `job-application-assistant/04-job-evaluation.md` | Fit scoring framework |
 | `job-application-assistant/05-cv-templates.md` | Editorial CV guidance (section order, content rules) |

@@ -49,9 +49,9 @@ A long dot-separated skills line is the canonical failure mode of this section. 
 
 ## Personal Projects
 
-- Describe the project as what it is — never inflate scope or reframe it as something it wasn't (an evaluation tool, a research project, professional work).
-- `exposure`-type tools (side-project or incidental tech) appear here and only here, as part of the project description.
-- One entry, 1–3 lines. Moves up in prominence when the Framing Notes in `01-candidate-profile.md` call for it.
+- A personal project is described as what it literally is (e.g. **a hobby app with an AI agent**) — never inflated into "an evaluation tool" or a research project.
+- `exposure`-type tools (LangChain, Gemini SDK, Mistral, liteLLM, MCP, Vue/JS) appear here and only here, as part of the project description.
+- One entry, 1–3 lines. Moves up in prominence for builder-PM / agentic-AI roles (see Framing Notes in `01-candidate-profile.md`).
 
 ---
 
