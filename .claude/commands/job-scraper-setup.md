@@ -74,6 +74,22 @@ Also ask about independent projects, freelance work, or side projects.
 - Software tools and platforms
 - Any other technical skills
 
+For each skill or tool mentioned across Sections 3–4, classify it (silently, don't turn this into a form) into one of three claim types — you'll need this for Section 4.5:
+- `capability`: backed by shipped, evidence-bearing work in Experience — safe to lead a CV bullet or competency with
+- `exposure`: used only in a side project, once, or at prototype depth — never a standalone competency
+- `hygiene`: baseline tooling/role craft (Jira, Git, Scrum, stakeholder management, etc.) — never printed, kept only for ATS keyword coverage
+
+### Section 4.5: Core Definition & Claims Inventory
+
+This section produces the two artifacts every other skill (writing style, CV templates, reviewer) depends on: the **Core Definition** (single-line identity) and the **Claims Inventory** (capability/exposure/hygiene classification with tiers).
+
+1. **Core Definition:** Synthesize one sentence describing *what kind of professional* the candidate is — never an achievement, never a list of domains, no "N+ years". Draft it, show it to the user, and iterate until they confirm it's exact. This line will be used verbatim everywhere; get it right here.
+2. **Claims Inventory — differentiators:** From the skills classified above, pick 3–6 `capability` claims that most set the candidate apart from other applicants in their target roles. Each needs: a short name, what it means in one clause, and the specific Experience entries that serve as evidence.
+3. **Claims Inventory — supporting:** Remaining `capability` claims that strengthen the story but don't lead it.
+4. **Exposure:** List side-project-only tech/tools with a one-line note on where they may appear (Personal Projects entry only).
+5. **Hygiene:** List baseline tooling/role craft — confirm with the user this list is never meant to appear on the CV itself.
+6. **Framing Notes:** Ask "Are there a few different types of roles you're targeting that call for different emphasis?" (e.g., technical vs. domain vs. leadership-leaning). For each named role-type, write one line on which Experience/Capability to lead with. Add a "Core positioning across all roles" line — the one sentence that should stay consistent no matter which template is used.
+
 ### Section 5: Publications & Awards (optional)
 - Peer-reviewed papers, conference presentations
 - Hackathons, competitions, awards
@@ -130,11 +146,14 @@ Once all information is collected (via either path), generate the following file
 
 ### 1. Write `01-candidate-profile.md`
 Populate `.claude/skills/job-application-assistant/01-candidate-profile.md` with all collected data. Sections to fill:
+- Core Definition (single-line identity from Section 4.5 — verbatim, confirmed with the user)
 - Identity & Contact (name, location, phone, email, LinkedIn, GitHub, languages, status, constraints)
 - Education table
 - Professional Experience (one subsection per role)
 - Independent Projects
 - Technical Skills (programming, domain, tools)
+- Claims Inventory (from Section 4.5): Capabilities — differentiators, Capabilities — supporting, Exposure, Hygiene — each capability claim must cite the specific Experience entry that backs it
+- Framing Notes (from Section 4.5): one line per named role-type plus the cross-role core positioning line
 - Certifications, Publications, Awards, References
 - Behavioral Summary (profile type, strengths, growth areas, ideal environment, passions)
 - Career Goals & Target Sectors (target roles, target sectors, deal-breakers)
@@ -190,7 +209,7 @@ Present a summary:
 
 > **Setup complete!** Here's what was generated:
 >
-> - `.claude/skills/job-application-assistant/01-candidate-profile.md` - Your complete candidate profile (single source of truth: identity, experience, behavioral summary, career goals)
+> - `.claude/skills/job-application-assistant/01-candidate-profile.md` - Your complete candidate profile (single source of truth: identity, experience, Claims Inventory, Framing Notes, behavioral summary, career goals)
 > - `.claude/skills/job-application-assistant/02-behavioral-profile.md` - Full behavioral assessment detail
 > - `.claude/skills/job-application-assistant/04-job-evaluation.md` - Personalized evaluation framework
 > - `.claude/skills/job-application-assistant/05-cv-templates.md` - CV templates with your profile statements
