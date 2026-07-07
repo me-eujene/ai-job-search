@@ -6,7 +6,7 @@ allowed-tools: "Read, WebSearch, WebFetch"
 
 # job-reviewer
 
-Independent reviewer agent. Spawned by the `/search` orchestrator using the Agent tool with `subagent_type: general-purpose`. Independence from the drafting context is the point — do not run this inline.
+Independent reviewer agent. Spawned by the `/search` orchestrator using the Agent tool with `subagent_type: general-purpose` and `model: sonnet` — the review is checklist- and research-driven, a smaller model handles it well and keeps cost down. Independence from the drafting context is the point — do not run this inline.
 
 ---
 
@@ -14,7 +14,7 @@ Independent reviewer agent. Spawned by the `/search` orchestrator using the Agen
 
 1. Load this skill to get the reviewer prompt template
 2. Fill all `INSERT_*` placeholders with actual values from the current session
-3. Spawn a `general-purpose` agent via the Agent tool with the filled prompt
+3. Spawn a `general-purpose` agent via the Agent tool with the filled prompt and `model: sonnet`
 4. Pass the returned critique to `job-writer` as `critique`
 
 ---
@@ -28,6 +28,7 @@ Before spawning, replace all of these in the prompt template below:
 | `INSERT_VOICE_INPUTS` | Candidate's answers from job-writer Step 2 |
 | `INSERT_AUTHENTICITY_INPUTS` | Candidate's answers from job-writer Step 3 |
 | `INSERT_FRAMING_APPROVAL` | The 2–3 sentence framing the user confirmed in job-writer Step 4 |
+| `INSERT_REQUIREMENTS_MAP` | The approved requirement → claim → placement table from job-writer Step 4 |
 | `INSERT_FOLDER` | `applications/<company>-<role>/` |
 | `INSERT_JOB_POSTING_TEXT` | Full raw text of the job posting |
 
@@ -51,6 +52,11 @@ INSERT_AUTHENTICITY_INPUTS
 The candidate confirmed this framing before drafting. Do not flag it as wrong — it was intentional.
 
 INSERT_FRAMING_APPROVAL
+
+## Approved requirements map
+The drafter classified every JD requirement (must / nice / noise) and mapped it to a claim and a placement. The candidate approved this map. Use it as the importance model for your whole review: `must` requirements matter, `noise` requirements deserve no ink, and every CV line should trace to a row.
+
+INSERT_REQUIREMENTS_MAP
 
 ## Your tasks
 
@@ -82,16 +88,28 @@ INSERT_JOB_POSTING_TEXT
 ### 5. Produce feedback
 Return a structured critique with specific, actionable suggestions:
 
-**a) Missed keywords/requirements**
-List requirements or keywords from the posting not addressed in the drafts. For each, suggest where and how to add them with specific text.
+**a) Signal audit — top-3 must-sees**
+From the requirements map, name the 3 things this hiring manager must find in the first 20 seconds. Check each is visible in the top third of page 1 of the CV (profile statement, competencies, or first bullets of the most recent role). Report where each actually appears, or that it is buried/missing.
 
-**b) Company/department-specific angles**
-Based on your research, suggest specific angles to add. Connect experience to the company's strategic priorities.
+Then classify **every CV line** as `differentiator` / `supporting` / `filler`. List all `filler` lines with a recommendation to cut. A line that answers no `must` or `nice` requirement and expresses no differentiator is filler by definition. Cutting is the preferred fix — do not suggest rewording filler into something else.
 
-**c) Action-oriented reframing**
-Identify passive or generic statements and suggest action-oriented rewrites.
+**b) Category audit**
+Check the claim-type discipline defined in the Claims Inventory of `01-candidate-profile.md`:
+- Every Core Competencies bullet must trace to a named `capability` claim with evidence in the Experience section. Flag any competency without a supporting evidence bullet.
+- Flag any `exposure`-type item (side-project tech: LangChain, Gemini SDK, Mistral, liteLLM, MCP, Vue/JS) appearing outside the Personal Projects entry — this is a fabrication-class violation.
+- Flag any `hygiene` item printed anywhere (Jira, Confluence, Figma, Postman, Git, Agile/Scrum, roadmapping, stakeholder management as a label).
+- Flag any achievement claim appearing outside the Experience bullets (e.g. in the profile statement).
 
-**d) Tone and style issues**
+**c) Missed must-have requirements**
+List only `must`-priority requirements from the map not addressed in the drafts. For each: name the gap, identify the closest existing evidence in the profile, and state whether it is addressable (adjacent experience exists) or a genuine gap (nothing in the profile supports it). Do NOT write suggested replacement text — the drafter owns that. If addressable, point to the specific existing bullet or claim the drafter should reframe; do not reframe it yourself. Do not report missing `nice` or `noise` keywords — keyword coverage is not a goal.
+
+**d) Company/department-specific angles**
+Based on your research, identify strategic priorities of the company that map to existing profile evidence. Name the connection — do not write new text to insert. Flag any company-specific claim that cannot be independently verified from their website or press releases.
+
+**e) Action-oriented reframing**
+Identify passive or generic statements. For each, describe what is weak about it and what type of outcome or action it should convey — do not write the replacement. Exception: style-only fixes (em-dash removal, cliché substitution with a single word) may be written inline since they carry no factual content.
+
+**f) Tone and style issues**
 Run every check in `.claude/skills/job-application-assistant/08-writing-style-review.md`. Report pass/fail for each item. Key checks:
 - Authenticity check: does the motivation section use what the candidate actually said, or did it revert to generic language? Flag any passage that reads as constructed rather than rooted in the candidate's own words.
 - Flag em-dashes used as prose separators
@@ -100,13 +118,16 @@ Run every check in `.claude/skills/job-application-assistant/08-writing-style-re
 - Flag generic buzzwords without concrete backing
 - Flag cover letter body exceeding 200 words
 
-**e) Verification checklist**
+**g) Verification checklist**
 Report pass/fail for each item:
 - [ ] All claims match actual profile — no fabricated skills, experience, or achievements; relative weight of experiences is preserved
+- [ ] Profile statement sentence 1 is character-for-character identical to the Core Definition line in `01-candidate-profile.md` (mechanical check — diff them)
+- [ ] Profile statement contains no achievements, no generic PM-craft traits, and no "N+ years" attached to a domain
+- [ ] Core Competencies has max 3 bullets, each traceable to a `capability` claim
 - [ ] Job titles, dates, company names, and locations are correct
 - [ ] Contact details are correct
 - [ ] Profile statement is tailored to this specific role
-- [ ] Key job requirements are addressed
+- [ ] All `must` requirements are addressed or honestly acknowledged as gaps
 - [ ] No spelling or grammar errors
 - [ ] Agentic coding / AI tooling references mention Claude Code by name
 - [ ] Cover letter addressed correctly

@@ -26,7 +26,7 @@ from ..helpers import (
     build_client, iso_date, iso_ts, utc_now, parse_iso, is_within_days,
     load_title_keywords, title_matches, html_to_md,
 )
-from ..types import Job, make_canonical_key
+from ..types import Job, make_canonical_key, is_description_ok
 
 logger = logging.getLogger(__name__)
 
@@ -245,15 +245,17 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
             or f"https://www.nationalevacaturebank.nl/vacature/{job_id}"
         )
 
+    description = html_to_md(raw.get("description")) or None
     return Job(
-        id            = str(job_id),
-        source        = "nvb",
-        title         = title,
-        company       = company,
-        location      = location,
-        date_posted   = date_posted,
-        fetched_at    = fetched_at,
-        description   = html_to_md(raw.get("description")) or None,
-        apply_url     = apply_url,
-        canonical_key = make_canonical_key(title, company, city),
+        id             = str(job_id),
+        source         = "nvb",
+        title          = title,
+        company        = company,
+        location       = location,
+        date_posted    = date_posted,
+        fetched_at     = fetched_at,
+        description    = description,
+        apply_url      = apply_url,
+        canonical_key  = make_canonical_key(title, company, city),
+        description_ok = is_description_ok(description),
     )

@@ -28,9 +28,15 @@ Direct, first-person, active voice. Confident without arrogance. No buzzwords, n
 ## CV Rules
 
 - **No prose.** Every bullet is a standalone declaration. No connective tissue ("in this role", "which allowed me to", "additionally"), no subordinate clauses, no multi-part sentences that tell a story.
-- Header blob: 2 sentences max, tailored per role, never repeating claims from experience bullets.
-- Core competencies: answer "what you'll bring" from the JD — domain-specific hard skills only. "Stakeholder management" and generic role craft do not belong here.
+- Header blob: 2 sentences max, tailored per role, never repeating claims from experience bullets. Sentence 1 is the identity line from `01-candidate-profile.md`, verbatim — states what *kind* of candidate this is, never an achievement, never a generic craft trait ("data-driven", "customer-obsessed"), never "N+ years" attached to a domain, no tense mixing.
+- Core competencies: max 3 bullets, answering "what you'll bring" from the JD — domain-specific hard skills only. "Stakeholder management" and generic role craft do not belong here.
+- **Claim-type discipline** (types defined in the Claims Inventory in `01-candidate-profile.md`):
+  - `capability` claims (evidence-backed) are the only source for competencies and profile framing
+  - `exposure` claims (side-project or incidental tech) appear only inside the Personal Projects entry — presenting one as a standalone competency is a fabrication-class violation
+  - `hygiene` items (Jira, Git, Figma, Scrum, roadmapping) are never printed anywhere on the CV
 - Every bullet starts with action verb or bold category. Be specific: numbers, tools, outcomes.
+- Signal over coverage: a screener spends ~30 seconds on page 1. Every generic line next to a differentiator lowers its perceived weight. When a line is questionable, cut it — don't reword it.
+- Every line traces to a requirements-map row or the identity line; the top-3 highest-priority requirements must be visible in the top third of page 1.
 
 ---
 

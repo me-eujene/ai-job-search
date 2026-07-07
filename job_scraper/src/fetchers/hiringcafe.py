@@ -1,25 +1,20 @@
 """
 Fetcher for hiring.cafe — a global job board with strong NL/EU coverage.
 
-API: https://hiring.cafe/api/search-jobs
+KEY FINDINGS (2026-06-01):
+  - Old /api/search-jobs endpoint is now auth-gated (returns 401).
+  - Cloudflare challenge is no longer presented; cf_clearance approach is obsolete.
+  - Current approach: fetch /_next/data/{buildId}/index.json?searchState=<JSON>
+    — a public Next.js SSR endpoint that returns the first page of results without auth.
+  - buildId is extracted from __NEXT_DATA__ in the hiring.cafe homepage HTML.
+  - Location filtering: pass Netherlands location object in searchState.locations;
+    geo_country=NL cookie also helps server-side filtering.
+  - Date filtering: dateFetchedPastNDays in searchState is honoured server-side.
+  - Pagination: only the SSR first page is publicly accessible (~58-74 results/query).
+    Subsequent pages require auth — single-page retrieval is accepted as the limit.
+  - ssrIsLastPage: true signals no further pages even if we could fetch them.
 
-KEY FINDINGS (2026-03-26):
-  - Site is protected by Cloudflare Bot Management (JS challenge).
-    Plain httpx / curl-cffi both fail with 403.
-  - Solution: cf_clearance Python package (Playwright + stealth JS injection)
-    launches a real Chromium browser, solves the challenge automatically, and
-    returns a cf_clearance cookie that authorises subsequent httpx requests.
-  - Cookie must be used with the SAME User-Agent that Playwright reported;
-    mismatched UA causes immediate 403.
-  - Cookie lifetime: ~30 min to a few hours. Refreshed automatically each run.
-  - Search state param `s` = base64(url_encode(JSON)) — a 94-key JSON object.
-    Only a handful of keys matter; the rest can be omitted (API ignores missing keys).
-  - Pagination: ?page=1,2,3... — empty results array signals end.
-  - Date field: v5_processed_job_data.estimated_publish_date (ISO-8601 string).
-  - Location field: v5_processed_job_data.formatted_workplace_location (human string).
-  - `is_expired: True` listings are occasionally returned — filtered out.
-
-Field map:
+Field map (unchanged from original — same job object structure):
   title       → job_information.title
   company     → enriched_company_data.name  (or v5.company_name fallback)
   location    → v5.formatted_workplace_location
@@ -28,11 +23,10 @@ Field map:
   description → job_information.description  (full HTML)
   id          → id  (e.g. "ashby___mollie___3955c991-...")
 """
-import asyncio
-import base64
+import json
 import logging
+import re
 from typing import Optional
-from urllib.parse import quote
 
 import httpx
 
@@ -40,15 +34,16 @@ from ..helpers import (
     build_client, iso_date, iso_ts, utc_now, parse_iso, is_within_days,
     load_title_keywords, title_matches, html_to_md,
 )
-from ..types import Job, make_canonical_key
+from ..types import Job, make_canonical_key, is_description_ok
 
 logger = logging.getLogger(__name__)
 
-PAGE_SIZE     = 40
-MAX_PAGES     = 10
 LOOKBACK_DAYS = 14
-
-# Netherlands country-level location object used in the search state.
+_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/145.0.0.0 Safari/537.36"
+)
 _NL_LOCATION = {
     "formatted_address": "Netherlands",
     "types": ["country"],
@@ -59,54 +54,25 @@ _NL_LOCATION = {
     ],
     "options": {"flexible_regions": ["anywhere_in_continent", "anywhere_in_world"]},
 }
+_GEO_COOKIES = {
+    "geo_country": "NL",
+    "geo_lat": "52.3716",
+    "geo_lng": "4.8883",
+    "geo_city": "Amsterdam",
+}
 
 
-def _build_s(query: str, lookback_days: int) -> str:
-    """Encode a hiring.cafe search state as base64(url_encode(JSON))."""
-    payload = {
-        "searchQuery": query,
-        "locations": [_NL_LOCATION],
-        "workplaceTypes": ["Remote", "Hybrid", "Onsite"],
-        "commitmentTypes": ["Full Time", "Part Time", "Contract"],
-        "dateFetchedPastNDays": lookback_days,
-        "sortBy": "default",
-    }
-    import json
-    return base64.b64encode(quote(json.dumps(payload)).encode()).decode()
-
-
-async def _get_cf_clearance() -> tuple[str, str]:
-    """
-    Launch a stealth Chromium browser, solve the Cloudflare challenge on
-    hiring.cafe, and return (cf_clearance_value, user_agent).
-
-    Raises RuntimeError if the cookie cannot be obtained.
-    """
-    try:
-        from playwright.async_api import async_playwright
-        from cf_clearance import async_stealth, async_cf_retry
-    except ImportError as e:
-        raise RuntimeError(
-            "cf-clearance and playwright are required for hiring.cafe. "
-            "Run: pip install cf-clearance playwright && playwright install chromium"
-        ) from e
-
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=False)
-        try:
-            page = await browser.new_page()
-            await async_stealth(page)
-            await page.goto("https://hiring.cafe/")
-            await async_cf_retry(page, tries=15)
-            ua = await page.evaluate("navigator.userAgent")
-            cookies = await page.context.cookies()
-        finally:
-            await browser.close()
-
-    cf = next((c["value"] for c in cookies if c["name"] == "cf_clearance"), None)
-    if not cf:
-        raise RuntimeError("hiring.cafe: cf_clearance cookie not found after challenge")
-    return cf, ua
+def _get_build_id(client: httpx.Client) -> str:
+    """Extract Next.js buildId from the hiring.cafe homepage __NEXT_DATA__ block."""
+    resp = client.get("https://hiring.cafe/", timeout=15)
+    resp.raise_for_status()
+    m = re.search(
+        r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
+        resp.text,
+    )
+    if not m:
+        raise RuntimeError("__NEXT_DATA__ not found in hiring.cafe HTML")
+    return json.loads(m.group(1))["buildId"]
 
 
 async def fetch_hiringcafe(
@@ -114,94 +80,85 @@ async def fetch_hiringcafe(
     lookback_days: int = LOOKBACK_DAYS,
     title_keywords: list[str] | None = None,
 ) -> list[Job]:
-    """Fetch hiring.cafe NL jobs via the search API (Cloudflare-protected)."""
+    """Fetch hiring.cafe NL jobs via the Next.js SSR data endpoint."""
     queries        = queries or ["product manager"]
     title_keywords = title_keywords or load_title_keywords()
     fetched_at     = iso_ts(utc_now())
     jobs: list[Job] = []
     seen_keys: set[str] = set()
 
-    # Solve Cloudflare challenge once; reuse cookie for all pages.
-    try:
-        cf_cookie, ua = await _get_cf_clearance()
-    except Exception as e:
-        logger.error("hiring.cafe: could not obtain cf_clearance — %s", e)
-        return []
-
     headers = {
-        "User-Agent": ua,
+        "User-Agent": _UA,
         "Accept": "*/*",
         "Referer": "https://hiring.cafe/",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-origin",
+        "x-nextjs-data": "1",
     }
 
-    async with httpx.AsyncClient(
-        headers=headers,
-        cookies={"cf_clearance": cf_cookie},
-        follow_redirects=True,
-        timeout=30.0,
-    ) as client:
+    with httpx.Client(headers=headers, cookies=_GEO_COOKIES, follow_redirects=True, timeout=20.0) as client:
+        try:
+            build_id = _get_build_id(client)
+            logger.info("hiring.cafe: buildId=%s", build_id)
+        except Exception as e:
+            logger.error("hiring.cafe: could not fetch buildId — %s", e)
+            return []
+
+        data_url = f"https://hiring.cafe/_next/data/{build_id}/index.json"
+
         for query in queries:
             logger.info("hiring.cafe: searching '%s'", query)
-            s = _build_s(query, lookback_days)
+            search_state = json.dumps({
+                "searchQuery": query,
+                "locations": [_NL_LOCATION],
+                "dateFetchedPastNDays": lookback_days,
+            })
+            try:
+                resp = client.get(data_url, params={"searchState": search_state})
+                resp.raise_for_status()
+                page_props = resp.json().get("pageProps", {})
+            except Exception as e:
+                logger.error("hiring.cafe '%s': %s", query, e)
+                continue
 
-            for page_num in range(1, MAX_PAGES + 1):
-                try:
-                    resp = await client.get(
-                        "https://hiring.cafe/api/search-jobs",
-                        params={"s": s, "size": str(PAGE_SIZE), "page": str(page_num), "sv": "control"},
-                    )
-                    resp.raise_for_status()
-                    raw_jobs = resp.json().get("results", [])
-                except Exception as e:
-                    logger.error("hiring.cafe '%s' page %d: %s", query, page_num, e)
-                    break
+            raw_jobs = page_props.get("ssrHits") or []
+            ssr_error = page_props.get("ssrError")
+            if ssr_error:
+                logger.error("hiring.cafe '%s': ssrError=%s", query, ssr_error)
+                continue
 
-                if not raw_jobs:
-                    logger.info("hiring.cafe '%s': empty page at %d — done", query, page_num)
-                    break
+            logger.info(
+                "hiring.cafe '%s': %d hits (total=%s, isLastPage=%s)",
+                query, len(raw_jobs),
+                page_props.get("ssrTotalCount"),
+                page_props.get("ssrIsLastPage"),
+            )
 
-                skipped_title = 0
-                date_stop = False
-                for raw in raw_jobs:
-                    if raw.get("is_expired"):
-                        continue
+            skipped_title = 0
+            for raw in raw_jobs:
+                if raw.get("is_expired"):
+                    continue
 
-                    v5   = raw.get("v5_processed_job_data") or {}
-                    info = raw.get("job_information") or {}
-                    title = info.get("title") or ""
+                v5   = raw.get("v5_processed_job_data") or {}
+                info = raw.get("job_information") or {}
+                title = info.get("title") or ""
 
-                    if not title_matches(title, "", title_keywords):
-                        skipped_title += 1
-                        continue
+                if not title_matches(title, "", title_keywords):
+                    skipped_title += 1
+                    continue
 
-                    date_str = v5.get("estimated_publish_date") or ""
-                    if date_str and not is_within_days(date_str, lookback_days):
-                        date_stop = True
-                        break
+                date_str = v5.get("estimated_publish_date") or ""
+                if date_str and not is_within_days(date_str, lookback_days):
+                    continue
 
-                    job = _normalise(raw, v5, info, fetched_at)
-                    if job is None:
-                        continue
-                    if job.canonical_key in seen_keys:
-                        continue
-                    seen_keys.add(job.canonical_key)
-                    jobs.append(job)
+                job = _normalise(raw, v5, info, fetched_at)
+                if job is None:
+                    continue
+                if job.canonical_key in seen_keys:
+                    continue
+                seen_keys.add(job.canonical_key)
+                jobs.append(job)
 
-                if skipped_title:
-                    logger.info(
-                        "hiring.cafe '%s' page %d: skipped %d off-topic titles",
-                        query, page_num, skipped_title,
-                    )
-
-                if date_stop:
-                    logger.info("hiring.cafe '%s': hit lookback limit at page %d — done", query, page_num)
-                    break
-
-                if page_num < MAX_PAGES:
-                    await asyncio.sleep(1.0)
+            if skipped_title:
+                logger.info("hiring.cafe '%s': skipped %d off-topic titles", query, skipped_title)
 
     logger.info("hiring.cafe: collected %d jobs", len(jobs))
     return jobs
@@ -217,8 +174,6 @@ def _normalise(raw: dict, v5: dict, info: dict, fetched_at: str) -> Optional[Job
     company = company_data.get("name") or v5.get("company_name") or ""
 
     location = v5.get("formatted_workplace_location") or ""
-    # Trim redundant country suffix: "Amsterdam, North Holland, Netherlands" → keep as-is
-    # but "Netherlands, Netherlands" → "Netherlands"
     parts = [p.strip() for p in location.split(",")]
     if len(parts) >= 2 and parts[-1] == parts[-2]:
         location = ", ".join(parts[:-1])
@@ -229,15 +184,17 @@ def _normalise(raw: dict, v5: dict, info: dict, fetched_at: str) -> Optional[Job
 
     apply_url = raw.get("apply_url") or f"https://hiring.cafe/viewjob/{job_id}"
 
+    description = html_to_md(info.get("description")) or None
     return Job(
-        id            = job_id,
-        source        = "hiringcafe",
-        title         = title,
-        company       = company,
-        location      = location,
-        date_posted   = date_posted,
-        fetched_at    = fetched_at,
-        description   = html_to_md(info.get("description")) or None,
-        apply_url     = apply_url,
-        canonical_key = make_canonical_key(title, company, location),
+        id             = job_id,
+        source         = "hiringcafe",
+        title          = title,
+        company        = company,
+        location       = location,
+        date_posted    = date_posted,
+        fetched_at     = fetched_at,
+        description    = description,
+        apply_url      = apply_url,
+        canonical_key  = make_canonical_key(title, company, location),
+        description_ok = is_description_ok(description),
     )

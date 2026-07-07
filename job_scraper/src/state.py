@@ -38,9 +38,10 @@ def init_db() -> None:
                 location      TEXT,
                 source        TEXT,
                 apply_url     TEXT,
+                description   TEXT,
+                description_ok INTEGER DEFAULT 0,
                 date_posted   TEXT,
                 first_seen    TEXT NOT NULL,
-                description   TEXT,
                 fetched_at    TEXT
             );
 
@@ -64,12 +65,14 @@ def init_db() -> None:
                 ts         TEXT NOT NULL
             );
         """)
-        # Migrate existing databases that predate description/fetched_at columns.
+        # Migrations for databases created by older schema versions.
         existing = {row[1] for row in con.execute("PRAGMA table_info(seen_jobs)")}
-        if "description" not in existing:
-            con.execute("ALTER TABLE seen_jobs ADD COLUMN description TEXT")
         if "fetched_at" not in existing:
             con.execute("ALTER TABLE seen_jobs ADD COLUMN fetched_at TEXT")
+        if "description" not in existing:
+            con.execute("ALTER TABLE seen_jobs ADD COLUMN description TEXT")
+        if "description_ok" not in existing:
+            con.execute("ALTER TABLE seen_jobs ADD COLUMN description_ok INTEGER DEFAULT 0")
 
 
 def prune_old(days: int | None = None) -> int:
@@ -90,6 +93,7 @@ def prune_old(days: int | None = None) -> int:
 def mark_seen_if_new(canonical_key: str, title: str, company: str,
                      location: str, source: str, apply_url: str,
                      date_posted: str, description: Optional[str] = None,
+                     description_ok: bool = False,
                      fetched_at: Optional[str] = None) -> bool:
     """Insert the job atomically. Returns True if inserted (new), False if already seen."""
     now = datetime.now(timezone.utc).isoformat()
@@ -97,11 +101,22 @@ def mark_seen_if_new(canonical_key: str, title: str, company: str,
         cur = con.execute("""
             INSERT OR IGNORE INTO seen_jobs
               (canonical_key, title, company, location, source, apply_url,
-               date_posted, first_seen, description, fetched_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               date_posted, first_seen, fetched_at, description, description_ok)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (canonical_key, title, company, location, source,
-              apply_url, date_posted, now, description, fetched_at))
+              apply_url, date_posted, now, fetched_at,
+              description, 1 if description_ok else 0))
         return cur.rowcount > 0
+
+
+def update_description(canonical_key: str, description: Optional[str],
+                       description_ok: bool) -> None:
+    """Backfill a description after post-dedup enrichment."""
+    with _conn() as con:
+        con.execute("""
+            UPDATE seen_jobs SET description = ?, description_ok = ?
+            WHERE canonical_key = ?
+        """, (description, 1 if description_ok else 0, canonical_key))
 
 
 def start_run(run_id: str, started_at: str) -> None:
@@ -185,7 +200,8 @@ def get_jobs(
     with _conn() as con:
         rows = con.execute(f"""
             SELECT canonical_key, title, company, location, source,
-                   apply_url, date_posted, first_seen, description, fetched_at
+                   apply_url, date_posted, first_seen, fetched_at,
+                   description, description_ok
             FROM seen_jobs
             {where}
             ORDER BY first_seen DESC

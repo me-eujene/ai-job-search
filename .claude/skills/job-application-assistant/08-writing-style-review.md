@@ -51,10 +51,24 @@ Each bullet must stand as a standalone declaration. Rewrite or split anything th
 
 ---
 
+## Category and importance discipline (CV — hard fails)
+
+Claim types (`capability` / `exposure` / `hygiene`) are defined in the Claims Inventory in `01-candidate-profile.md`.
+
+- [ ] **[CV] Identity line is verbatim** — profile statement sentence 1 is character-for-character identical to the Core Definition line in `01-candidate-profile.md`. Diff them mechanically; any paraphrase is a fail.
+- [ ] **[CV] Profile statement carries no achievements** — deliverables, metrics, and outcomes belong in Experience. Also fail on generic craft traits ("data-driven", "customer-obsessed") and on "N+ years" attached to a domain.
+- [ ] **[CV] Every competency is evidence-backed** — each Core Competencies bullet traces to a `capability` claim with at least one supporting Experience bullet. A competency the Experience section cannot prove is a fail.
+- [ ] **[CV] No exposure-as-skill** — side-project or incidental tech appears only inside the Personal Projects entry. Anywhere else is a fabrication-class fail.
+- [ ] **[CV] No hygiene items printed** — Jira, Confluence, Figma, Postman, Git, Agile/Scrum, roadmapping, "stakeholder management" as a label. Zero tolerance.
+- [ ] **[CV] Top-3 must-sees are in the top third of page 1** — the three highest-priority requirements from the requirements map must be visible in the profile statement, competencies, or first bullets of the most recent role.
+- [ ] **[CV] No filler lines** — every line traces to a requirements-map row or the identity line. A line answering no `must`/`nice` requirement and expressing no differentiator must be cut, not reworded.
+
+---
+
 ## CV [CV]
 
-- [ ] Profile statement: exactly 2 sentences, tailored, no repetition of experience bullets.
-- [ ] Core competencies: domain-specific hard skills only — no "stakeholder management", no generic role craft.
+- [ ] Profile statement: max 2 sentences, tailored, no repetition of experience bullets.
+- [ ] Core competencies: max 3 bullets, domain-specific hard skills only — no "stakeholder management", no generic role craft.
 - [ ] Every bullet starts with action verb or bold category.
 - [ ] Every bullet contains number, tool, outcome, or named project.
 - [ ] 2-page limit respected.

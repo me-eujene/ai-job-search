@@ -24,7 +24,7 @@ from ..helpers import (
     build_client, iso_date, iso_ts, utc_now, parse_iso, is_within_days,
     load_title_keywords, title_matches,
 )
-from ..types import Job, make_canonical_key
+from ..types import Job, make_canonical_key, is_description_ok
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +114,8 @@ async def fetch_adzuna(
                 if len(raw_jobs) < RESULTS_PER_PAGE:
                     break
 
-    logger.info("Adzuna: collected %d jobs", len(jobs))
+        logger.info("Adzuna: collected %d jobs", len(jobs))
+
     return jobs
 
 
@@ -138,14 +139,17 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
     description = raw.get("description") or None
 
     return Job(
-        id            = job_id,
-        source        = "adzuna",
-        title         = title,
-        company       = company,
-        location      = city,
-        date_posted   = date_posted,
-        fetched_at    = fetched_at,
-        description   = description,
-        apply_url     = apply_url,
-        canonical_key = make_canonical_key(title, company, city),
+        id             = job_id,
+        source         = "adzuna",
+        title          = title,
+        company        = company,
+        location       = city,
+        date_posted    = date_posted,
+        fetched_at     = fetched_at,
+        description    = description,
+        apply_url      = apply_url,
+        canonical_key  = make_canonical_key(title, company, city),
+        description_ok = is_description_ok(description),
     )
+
+

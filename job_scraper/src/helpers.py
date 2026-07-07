@@ -66,6 +66,20 @@ def html_to_md(html: Optional[str]) -> Optional[str]:
     return _markdownify(html, heading_style="ATX", strip=["script", "style"]).strip() or None
 
 
+def extract_text_from_html(html: Optional[str], min_chars: int = 200) -> Optional[str]:
+    """Full-text extraction via trafilatura. None if empty or too short."""
+    if not html:
+        return None
+    import trafilatura
+    text = trafilatura.extract(
+        html,
+        include_comments=False,
+        include_tables=False,
+        no_fallback=False,
+    )
+    return text if text and len(text) >= min_chars else None
+
+
 # ---------------------------------------------------------------------------
 # Dates
 # ---------------------------------------------------------------------------

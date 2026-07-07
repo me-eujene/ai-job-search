@@ -16,6 +16,7 @@ venv/
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+*.xdv
 
 # Environment / secrets (never commit these)
 .env
@@ -23,6 +24,7 @@ venv/
 
 # Personal data (never commit these)
 job_scraper/state.db
+job_scraper/state.db.bak_*
 job_scraper/*.md
 *_BehavioralReport.pdf
 linkedin_Profile.pdf

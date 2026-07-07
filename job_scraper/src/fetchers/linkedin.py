@@ -32,17 +32,24 @@ BASE_URL    = "https://www.linkedin.com"
 SEARCH_PATH = "/jobs-guest/jobs/api/seeMoreJobPostings/search"
 
 DEFAULT_QUERIES  = ["product manager"]
-LOCATION         = "Amsterdam, Netherlands"
 LOOKBACK_DAYS    = 14
 PAGE_SIZE        = 25
 MAX_PAGES        = 5           # ceiling: 5 × 25 = 125 jobs per query
 INTER_PAGE_SLEEP = 2.0         # seconds between page fetches (1s hit 429 at page 5)
+INTER_PASS_SLEEP = 15.0        # cool-down between search passes; back-to-back passes trigger 429s
 
 # f_TPR values by day bucket. We pick the smallest bucket >= lookback_days.
 _TPR_BUCKETS = [(7, "r604800"), (14, "r1209600"), (30, "r2592000")]
 
 # Per-request Accept override (guest API returns HTML, not JSON)
 _HTML_HEADERS = {"Accept": "text/html, application/xhtml+xml, */*;q=0.9"}
+
+# Each query runs once per pass: Amsterdam-area (onsite/hybrid), then
+# country-wide remote (f_WT=2 is LinkedIn's workplace-type "Remote" filter).
+_SEARCH_PASSES: list[dict] = [
+    {"location": "Amsterdam, Netherlands"},
+    {"location": "Netherlands", "f_WT": "2"},
+]
 
 
 async def fetch_linkedin(
@@ -66,70 +73,75 @@ async def fetch_linkedin(
 
     async with build_client() as client:
         for query in queries:
-            logger.info("LinkedIn: searching '%s'", query)
-            start     = 0
-            date_stop = False
+            for search_pass in _SEARCH_PASSES:
+                if search_pass is not _SEARCH_PASSES[0]:
+                    await asyncio.sleep(INTER_PASS_SLEEP)
+                logger.info("LinkedIn: searching '%s' (%s)", query, search_pass["location"])
+                start     = 0
+                date_stop = False
 
-            for page_num in range(MAX_PAGES):
-                if date_stop:
-                    break
-
-                params = {
-                    "keywords": query,
-                    "location": LOCATION,
-                    "f_TPR":    tpr,
-                    "start":    start,
-                }
-
-                try:
-                    resp = await client.get(
-                        BASE_URL + SEARCH_PATH,
-                        params=params,
-                        headers=_HTML_HEADERS,
-                    )
-                    resp.raise_for_status()
-                except Exception as e:
-                    logger.error(
-                        "LinkedIn page %d error for '%s': %s", page_num, query, e
-                    )
-                    break
-
-                cards = _parse_cards(resp.text)
-                if not cards:
-                    logger.info(
-                        "LinkedIn '%s': empty page at start=%d — done", query, start
-                    )
-                    break
-
-                skipped_title = 0
-                for raw in cards:
-                    # Date gate — listings are newest-first, so we can early-exit
-                    date_str = raw.get("date", "")
-                    if date_str and not is_within_days(date_str, lookback_days):
-                        date_stop = True
+                for page_num in range(MAX_PAGES):
+                    if date_stop:
                         break
 
-                    if not title_matches(raw.get("title", ""), "", title_keywords):
-                        skipped_title += 1
-                        continue
+                    params = {
+                        "keywords": query,
+                        "location": search_pass["location"],
+                        "f_TPR":    tpr,
+                        "start":    start,
+                    }
+                    if "f_WT" in search_pass:
+                        params["f_WT"] = search_pass["f_WT"]
 
-                    job = _normalise(raw, fetched_at)
-                    if job is None:
-                        continue
-                    if job.canonical_key in seen_keys:
-                        continue
-                    seen_keys.add(job.canonical_key)
-                    jobs.append(job)
+                    try:
+                        resp = await client.get(
+                            BASE_URL + SEARCH_PATH,
+                            params=params,
+                            headers=_HTML_HEADERS,
+                        )
+                        resp.raise_for_status()
+                    except Exception as e:
+                        logger.error(
+                            "LinkedIn page %d error for '%s': %s", page_num, query, e
+                        )
+                        break
 
-                if skipped_title:
-                    logger.info(
-                        "LinkedIn '%s' start=%d: skipped %d off-topic titles",
-                        query, start, skipped_title,
-                    )
+                    cards = _parse_cards(resp.text)
+                    if not cards:
+                        logger.info(
+                            "LinkedIn '%s': empty page at start=%d — done", query, start
+                        )
+                        break
 
-                start += PAGE_SIZE
-                if page_num < MAX_PAGES - 1 and not date_stop:
-                    await asyncio.sleep(INTER_PAGE_SLEEP)
+                    skipped_title = 0
+                    for raw in cards:
+                        # Date gate — listings are newest-first, so we can early-exit
+                        date_str = raw.get("date", "")
+                        if date_str and not is_within_days(date_str, lookback_days):
+                            date_stop = True
+                            break
+
+                        if not title_matches(raw.get("title", ""), "", title_keywords):
+                            skipped_title += 1
+                            continue
+
+                        job = _normalise(raw, fetched_at)
+                        if job is None:
+                            continue
+                        if job.canonical_key in seen_keys:
+                            continue
+                        seen_keys.add(job.canonical_key)
+                        jobs.append(job)
+
+                    if skipped_title:
+                        logger.info(
+                            "LinkedIn '%s' start=%d: skipped %d off-topic titles",
+                            query, start, skipped_title,
+                        )
+
+                    start += PAGE_SIZE
+                    if page_num < MAX_PAGES - 1 and not date_stop:
+                        await asyncio.sleep(INTER_PAGE_SLEEP)
 
     logger.info("LinkedIn: collected %d jobs", len(jobs))
     return jobs
@@ -187,14 +199,39 @@ def _normalise(raw: dict, fetched_at: str) -> Optional[Job]:
     apply_url = f"{BASE_URL}/jobs/view/{job_id}/" if job_id else ""
 
     return Job(
-        id            = job_id or make_canonical_key(title, company, city)[:16],
-        source        = "linkedin",
-        title         = title,
-        company       = company,
-        location      = city,
-        date_posted   = date_posted,
-        fetched_at    = fetched_at,
-        description   = None,  # search results don't include full descriptions
-        apply_url     = apply_url,
-        canonical_key = make_canonical_key(title, company, city),
+        id             = job_id or make_canonical_key(title, company, city)[:16],
+        source         = "linkedin",
+        title          = title,
+        company        = company,
+        location       = city,
+        date_posted    = date_posted,
+        fetched_at     = fetched_at,
+        description    = None,  # search results don't include full descriptions
+        apply_url      = apply_url,
+        canonical_key  = make_canonical_key(title, company, city),
+        description_ok = False,
     )
+
+
+def _parse_detail_description(html: str) -> Optional[str]:
+    """Parse the job description from a LinkedIn job detail page."""
+    soup = BeautifulSoup(html, "lxml")
+
+    # Try specific LinkedIn markup class first
+    el = soup.find("div", class_="show-more-less-html__markup")
+    if el:
+        return el.get_text(separator=" ", strip=True)
+
+    # Fall back to any div whose class string contains "description"
+    for div in soup.find_all("div"):
+        classes = " ".join(div.get("class", []))
+        if "description" in classes:
+            return div.get_text(separator=" ", strip=True)
+
+    # Last resort: section tag with "description" in class
+    for section in soup.find_all("section"):
+        classes = " ".join(section.get("class", []))
+        if "description" in classes:
+            return section.get_text(separator=" ", strip=True)
+
+    return None

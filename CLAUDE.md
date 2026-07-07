@@ -101,11 +101,11 @@ The shortlist stays active for the full session — user can return to it after 
 
 **`job-writer` skill** — input: eval object, job posting text, folder path.
 
-Conducts: opening brief → voice interview (2 questions) → authenticity interview (2 questions) → framing checkpoint (user approves angle) → drafts `cv.md` and `cover.md`.
+Conducts: opening brief → voice interview (2 questions) → authenticity interview (2 questions) → **requirements map + framing checkpoint** (user approves the requirement → claim → placement table and the angle) → drafts `cv.md` and `cover.md`.
 
 Reads: `01-candidate-profile.md`, `03-writing-style.md`, `05-cv-templates.md`, `06-cover-letter-templates.md`.
 
-**State returned to pipeline after Phase 4:** `voice_inputs`, `authenticity_inputs`, `framing_approval`.
+**State returned to pipeline after Phase 4:** `voice_inputs`, `authenticity_inputs`, `framing_approval`, `requirements_map`.
 
 ---
 
@@ -118,18 +118,21 @@ Load **`job-reviewer` skill** to get the reviewer prompt template. Fill all plac
 | `INSERT_VOICE_INPUTS` | Phase 4 `voice_inputs` |
 | `INSERT_AUTHENTICITY_INPUTS` | Phase 4 `authenticity_inputs` |
 | `INSERT_FRAMING_APPROVAL` | Phase 4 `framing_approval` |
+| `INSERT_REQUIREMENTS_MAP` | Phase 4 `requirements_map` |
 | `INSERT_FOLDER` | folder path |
 | `INSERT_JOB_POSTING_TEXT` | full posting text |
 
-Spawn a `general-purpose` agent via the Agent tool with the filled prompt.
+Spawn a `general-purpose` agent via the Agent tool with the filled prompt and `model: sonnet` — the review is checklist-driven; a smaller model handles it well. (General rule: any spawned agent in this pipeline that executes a checklist or template rather than making editorial judgments should run on `sonnet`, or `haiku` for pure extraction tasks.)
 
 **State returned after Phase 5:** `critique` — structured feedback from the reviewer agent.
+
+**Approval gate (mandatory before Phase 6):** Present the critique to the user. Group items by type: style fixes (safe to apply automatically), gaps (genuine — acknowledge, do not patch), and reframing suggestions (require user approval before applying). Ask: "Which of these should I apply?" Do not proceed to Phase 6 until the user explicitly confirms. Pass only the approved subset to `job-writer` as `critique`.
 
 ---
 
 ### Phase 6: Revise
 
-**`job-writer` skill** with `mode: revise` — input: eval object, posting text, `voice_inputs`, `authenticity_inputs`, `framing_approval`, `critique`. Edits `cv.md` and `cover.md` in place.
+**`job-writer` skill** with `mode: revise` — input: eval object, posting text, `voice_inputs`, `authenticity_inputs`, `framing_approval`, `requirements_map`, `critique` (approved subset only). Edits `cv.md` and `cover.md` in place.
 
 ---
 
@@ -169,6 +172,14 @@ After creating or updating a CV or cover letter, re-read the generated file and 
 - [ ] Skills and experience bullets are reframed to match the job requirements
 - [ ] Key job requirements are addressed (with gaps acknowledged where relevant)
 - [ ] Nice-to-have requirements are highlighted where there is a match
+- [ ] Top-3 must-sees from the requirements map are visible in the top third of CV page 1
+
+### Category discipline
+- [ ] Profile statement sentence 1 is the identity line from `01-candidate-profile.md`, verbatim; no achievements, no "N+ years" + domain
+- [ ] Every Core Competencies bullet (max 3) traces to a `capability` claim with evidence in Experience
+- [ ] No `exposure`-type tech (side-project tools) outside the Personal Projects entry
+- [ ] No `hygiene` items printed anywhere (Jira, Git, Figma, Scrum, generic role craft)
+- [ ] Every line traces to a requirements-map row — filler lines are cut, not reworded
 
 ### Consistency
 - [ ] CV follows the standard 2-page moderncv/banking format

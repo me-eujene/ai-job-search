@@ -16,66 +16,71 @@ This file documents the current configuration for reference. Edit `.env` directl
 
 | Source | Status | Auth |
 |--------|--------|------|
+| LinkedIn NL | Enabled | None |
 | NVB (Nationale Vacaturebank) | Enabled | None |
-| Indeed NL | Enabled — requires `RAPIDAPI_KEY` | RapidAPI key |
-| LinkedIn NL | Enabled — requires `RAPIDAPI_KEY` | RapidAPI key |
+| hiring.cafe | Enabled | None |
+| Adzuna NL | Enabled | ADZUNA_APP_ID, ADZUNA_APP_KEY |
+| We Work Remotely (WWR) | Enabled | None |
+| Welcome to the Jungle (WTTJ) | Enabled | None |
+| Working Nomads | Enabled | None |
 
 ---
 
-### NVB settings
+### Search queries
 
 ```
-NVB_DCO_TITLE=[YOUR_PRIMARY_ROLE_TYPE]
-NVB_CITY=[YOUR_CITY]
+SEARCH_QUERIES=product manager,product owner,product lead,head of product
+```
+
+Full-text search queries sent to LinkedIn NL, hiring.cafe, and Adzuna NL. Comma-separated for multiple queries. Each additional query gives hiring.cafe an extra public results page (~60 results per query).
+
+LinkedIn runs two passes per query:
+- Amsterdam-area jobs (location radius: 40 km)
+- Country-wide remote jobs (f_WT=2)
+
+---
+
+### NVB (Nationale Vacaturebank) settings
+
+```
+NVB_DCO_TITLE=Productmanager
+NVB_CITY=Amsterdam
 NVB_DISTANCE_KM=40
 ```
 
-`NVB_DCO_TITLE` uses NVB's own job taxonomy (`dcoTitle` filter). Examples:
-- `Productmanager` — covers Product Manager, Senior PM, Product Owner, Product Lead
-- `Data Scientist`
-- `Software Engineer`
-- `Business Analyst`
+NVB uses server-side job taxonomy (`dcoTitle` filter). The value `Productmanager` covers Product Manager, Senior PM, Product Owner, Product Lead, etc. per NVB's own classification.
 
-To find valid taxonomy titles, search NVB and observe the `dcoTitle` value in the URL or network requests.
-
----
-
-### Indeed NL / LinkedIn NL queries
-
-```
-SEARCH_QUERIES=[YOUR_PRIMARY_JOB_TITLE],[YOUR_SECONDARY_JOB_TITLE]
-```
-
-Comma-separated search terms sent to both Indeed NL and LinkedIn NL. These are full-text searches, so broader terms (e.g. `product manager`) work better than narrow ones.
+NVB resolves city coordinates automatically and applies a radius filter.
 
 ---
 
 ### Title relevance filter (all sources)
 
 ```
-TITLE_KEYWORDS=[YOUR_PRIMARY_JOB_TITLE],[YOUR_SECONDARY_JOB_TITLE],[YOUR_KEY_SKILL]
+TITLE_KEYWORDS=product manager,product owner,product lead,head of product,director of product,product director,vp product,chief product,productmanager,producteigenaar
 ```
 
-Client-side filter applied after fetching. A job is kept only if its title contains at least one of these phrases. This is the safety net for API noise — especially NVB, which can return off-topic results even with `dcoTitle`. Use lowercase, comma-separated phrases.
+Client-side filter applied after fetching — a job is kept only if its title contains at least one of these phrases. This is the safety net for API noise; especially NVB can return off-topic results even with `dcoTitle`. Use lowercase, comma-separated phrases.
 
 ---
 
-### Location scope
+### Description enrichment (post-dedup)
 
-Target city and commute radius for NVB (NVB resolves coordinates automatically):
+Max detail-page fetches per run, per source:
 
 ```
-NVB_CITY=[YOUR_CITY]
-NVB_DISTANCE_KM=[YOUR_RADIUS_KM]
+LINKEDIN_MAX_DETAIL_FETCHES=30
+ADZUNA_MAX_DETAIL_FETCHES=50
+HIRINGCAFE_MAX_DETAIL_FETCHES=80
 ```
 
-For Indeed/LinkedIn, embed the city in `SEARCH_QUERIES` if needed (e.g. `product manager amsterdam`), since city-level filtering via API params is unreliable for NL.
+After deduplication, the scraper fetches full job descriptions from detail pages up to these limits per source per run.
 
-Acceptable commute areas (for Claude to use when assessing fit):
-- Ideal: [YOUR_CITY] and direct surroundings
-- Acceptable: [ACCEPTABLE_AREA_1]
-- Borderline: [BORDERLINE_AREA] (~X min by transit)
-- Too far: [TOO_FAR_AREA]
+---
+
+### Lookback (automatic)
+
+Lookback windows are computed automatically from the gap since the last successful run, typically 14–30 days. There is no per-source lookback env var.
 
 ---
 
@@ -87,8 +92,8 @@ Re-run setup to reconfigure search without touching your profile:
 /job-scraper-setup --section search
 ```
 
-Or edit `job_scraper/.env` directly and restart the server:
+Or edit `job_scraper/.env` directly:
 
 ```bash
-cd job_scraper && python -m ui.server
+# Edit job_scraper/.env and save. The scraper will pick up changes on the next run.
 ```
