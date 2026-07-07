@@ -28,6 +28,7 @@ job_scraper/state.db.bak_*
 job_scraper/*.md
 *_BehavioralReport.pdf
 linkedin_Profile.pdf
+_backups/
 
 # Personal photos and signatures
 *.jpg
