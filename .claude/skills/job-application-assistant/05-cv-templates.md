@@ -2,97 +2,84 @@
 
 <!-- SETUP: Profile statements and section ordering are personalized by running /job-scraper-setup -->
 
-Editorial guidance for writing and tailoring `cv.md`. All LaTeX rendering rules live in `07-latex-renderer-rules.md`.
+Editorial guidance for writing and tailoring `cv.md`. All LaTeX rendering rules live in `07-latex-renderer-rules.md`. This file is the **single authoritative spec** for each CV section — if another file appears to define a section differently, this one wins.
+
+The claims that feed every section come from the **Claims Inventory** in `01-candidate-profile.md`. Claim types (`capability` / `exposure` / `hygiene`) and tiers (`differentiator` / `supporting` / `hygiene`) are binding, not advisory.
 
 ---
 
-## Profile Statement / Elevator Pitch
+## Profile Statement
 
-The most important section to tailor. **2 sentences maximum.** Revolves around the candidate's core identity — does not change much between roles, only the emphasis shifts. Never repeats claims that appear in the experience bullets below.
+The most important section to tailor — and the most constrained.
 
-**Create 2–3 profile statement templates for your main role types:**
-
-<!-- SETUP: These are populated based on your background -->
-**For [YOUR_PRIMARY_ROLE_TYPE] roles:**
-> [YOUR_PROFILE_STATEMENT_TEMPLATE_1]
-
-**For [YOUR_SECONDARY_ROLE_TYPE] roles:**
-> [YOUR_PROFILE_STATEMENT_TEMPLATE_2]
-
----
-
-## Section Ordering
-
-The section order varies by role type:
-
-**For technical / data science / ML roles:**
-1. Profile statement / elevator pitch
-2. Core competencies / Skills
-3. Professional Experience (reverse chronological)
-4. Education (reverse chronological)
-5. Languages
-6. Publications & Awards
-7. References
-
-**For domain-specific / specialist roles:**
-1. Profile statement / elevator pitch
-2. Core competencies / Skills
-3. Education (reverse chronological) — credentials are a key qualifier
-4. Professional Experience (reverse chronological)
-5. Publications & Awards
-6. References
+- **Sentence 1: the identity line, verbatim** from the Core Definition in `01-candidate-profile.md`. It states what *kind* of PM the candidate is. Do not rewrite it.
+- **Sentence 2 (optional): role-specific emphasis** — only if the voice inputs warrant it. 2 sentences absolute maximum.
+- **Never achievements.** Deliverables, metrics, and outcomes live in the Experience bullets. A profile statement that summarises accomplishments is a rewrite violation.
+- **Never generic PM-craft traits** ("data-driven", "customer-obsessed", "results-oriented") — only differentiators.
+- **Never attach "N+ years" to a domain** ("10+ years building API products"). Tenure claims read as padding and date the candidate.
+- **No tense mixing** within the statement.
+- Never repeats claims that appear in the sections below.
 
 ---
 
-## Core Competencies / Skills
+## Core Competencies
 
-List 5–7 key competencies in bullet format, tailored to the specific job. For each competency, briefly explain how it adds value to the position. Reorder and emphasize based on the role.
+**Max 3 bullets.** Format: `**Category:** specifics`.
 
----
+Rules:
+- Each bullet answers a `must` requirement from the requirements map — competencies exist to mirror the "what you'll bring" section of the JD, nothing else.
+- Each bullet is backed by a named `capability` claim from the Claims Inventory, which in turn links to evidence in Experience. No capability without evidence.
+- `exposure` items (side-project tech) are banned here — they live in Personal Projects.
+- `hygiene` items (Jira, Git, Figma, Scrum, stakeholder management, generic role craft) are banned here and everywhere else on the CV.
+- `differentiator`-tier capabilities take the slots before `supporting`-tier ones.
 
-## Education
-
-- Always include your highest degrees
-- For senior roles, keep education brief (dates and titles only)
-- Include thesis topics when relevant to the target role
+A long dot-separated skills line is the canonical failure mode of this section. Three sharp bullets beat eleven keywords.
 
 ---
 
 ## Professional Experience
 
-- Rewrite bullets to emphasize aspects most relevant to the target role
-- Use 4–6 bullets for most recent role, 3–4 for previous, 2–3 for older
-- **Emphasize measurable results** where possible: "Reduced processing time by X%", "Model adopted by the team"
+- Reverse chronological. Rewrite bullets to emphasise the aspects mapped in the requirements map.
+- 4–6 bullets for most recent role, 2–3 for previous, 1–2 for older.
+- **Emphasise measurable results**: "Reduced processing time by X%", "alpha in ~6 months".
+- Relative weight of experiences must be preserved — a minor aspect of a role cannot lead its bullet list just because it matches the JD (see the interview backtrack test in `03-writing-style.md`).
+- Experience bullets are the **only** place achievement claims live.
+
+---
+
+## Personal Projects
+
+- Describe the project as what it is — never inflate scope or reframe it as something it wasn't (an evaluation tool, a research project, professional work).
+- `exposure`-type tools (side-project or incidental tech) appear here and only here, as part of the project description.
+- One entry, 1–3 lines. Moves up in prominence when the Framing Notes in `01-candidate-profile.md` call for it.
+
+---
+
+## Education
+
+- Degrees and completed courses, dates and titles only — the candidate's qualifiers are experience-based, keep this brief.
+
+---
+
+## Section Ordering
+
+Default order: Profile → Core Competencies → Experience → Personal Projects → Education → Languages → References.
+
+For builder-PM / agentic-AI roles, Personal Projects may move directly under Core Competencies.
 
 ---
 
 ## Handling Employment Gaps
 
-- Explain matter-of-factly if needed
-- Describe how professional development continued during the gap
-- Frame as deliberate skill-building and career repositioning
+- Explain matter-of-factly if needed.
+- Describe how professional development continued during the gap.
+- Frame as deliberate skill-building and career repositioning.
 
 ---
 
-## Publications
+## Traceability Rule
 
-- Include Google Scholar link if applicable
-- Select 3–4 most relevant publications (not always all)
-- For non-academic roles, keep brief
-
----
-
-## Honors and Awards
-
-Keep format brief — one line each.
-
----
-
-## References
-
-- List 2–4 references with name, title, company, and contact
-- End with: "More references are available upon request."
-- Do not attach reference letters
+Every line on the CV must trace to either the identity line or a row in the requirements map built in job-writer Step 4. A line that answers no requirement and expresses no differentiator is filler — cut it. When trimming for the page budget, cut in reverse tier order: hygiene never got in, `supporting` goes before `differentiator`.
 
 ---
 
@@ -103,13 +90,12 @@ The CV **must** fit on exactly 2 pages. Use these content limits:
 | Section | Max budget |
 |---------|-----------|
 | Profile statement | 2 sentences |
-| Skills | 5 items, each 1–2 lines |
+| Core Competencies | 3 bullets, each 1–2 lines |
 | Most recent role | 4–5 bullets |
 | Previous role | 2–3 bullets |
-| Older roles | 2 bullets (1 line each) |
-| Education | 2–3 entries |
-| Publications | 2–3 entries |
-| Awards | 3 entries, single line each |
+| Older roles | 1–2 bullets (1 line each) |
+| Personal Projects | 1 entry, 1–3 lines |
+| Education | 2–3 entries, 1 line each |
 | References | "Available upon request." (single line) |
 
 **If in doubt, cut rather than squeeze.** Cramped content is worse than missing content.
